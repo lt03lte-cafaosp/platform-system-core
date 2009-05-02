@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
  * All rights reserved.
+ * Copyright (c) 2009, Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -65,15 +66,25 @@ boot_img_hdr *mkbootimg(void *kernel, unsigned kernel_size,
 
     memcpy(hdr->magic, BOOT_MAGIC, BOOT_MAGIC_SIZE);
     
+#ifdef SURF8K
+    hdr->kernel_size = kernel_size;
+    hdr->kernel_addr = 0x16008000;
+    hdr->ramdisk_size = ramdisk_size;
+    hdr->ramdisk_addr = 0x1A000000;
+    hdr->second_size = second_size;
+    hdr->second_addr = 0x16F00000;
+    hdr->tags_addr = 0x16000100;
+    hdr->page_size = page_size;
+#else
     hdr->kernel_size = kernel_size;
     hdr->kernel_addr = 0x10008000;
     hdr->ramdisk_size = ramdisk_size;
     hdr->ramdisk_addr = 0x11000000;
     hdr->second_size = second_size;
     hdr->second_addr = 0x10F00000;
-    
     hdr->tags_addr = 0x10000100;
     hdr->page_size = page_size;
+#endif
 
     memcpy(hdr->magic + page_size, 
            kernel, kernel_size);

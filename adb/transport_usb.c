@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (c) 2009, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,6 +131,8 @@ int is_adb_interface(int vid, int pid, int usb_class, int usb_subclass, int usb_
     if (vid == VENDOR_ID_GOOGLE) {
             /* might support adb */
     } else if (vid == VENDOR_ID_HTC) {
+            /* might support adb */
+    } else if (vid == VENDOR_ID_QUALCOMM) {
             /* might support adb */
     } else {
             /* not supported */

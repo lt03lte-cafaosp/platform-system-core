@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (c) 2009, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +37,13 @@ typedef struct {
     int pid;
 } VendorProduct;
 
-#define kSupportedDeviceCount   4
+#define kSupportedDeviceCount   5
 VendorProduct kSupportedDevices[kSupportedDeviceCount] = {
     { VENDOR_ID_GOOGLE, PRODUCT_ID_SOONER },
     { VENDOR_ID_GOOGLE, PRODUCT_ID_SOONER_COMP },
     { VENDOR_ID_HTC, PRODUCT_ID_DREAM },
     { VENDOR_ID_HTC, PRODUCT_ID_DREAM_COMP },
+    { VENDOR_ID_QUALCOMM, PRODUCT_ID_QUALCOMM },
 };
 
 static IONotificationPortRef    notificationPort = 0;

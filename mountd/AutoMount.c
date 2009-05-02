@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (c) 2009, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -252,6 +253,7 @@ static int DoMountDevice(const char* device, const char* mountPoint)
 #endif
 
     int flags = 0;
+    int fp;
     
     if (device && strncmp(device, "/dev/", 5))
     {
@@ -345,7 +347,12 @@ static int DoMountDevice(const char* device, const char* mountPoint)
 #endif
         LOG_MOUNT("Unable to mount %s on %s\n", device, mountPoint);
     }
-
+   
+   if (fp = open("/sys/devices/platform/usb_mass_storage/lun0/file",O_RDWR))
+      write(fp,"/dev/block/mmcblk0p1",20);
+   else
+      LOG_ERROR("lun0 not created\n");
+          
     return result;
 }
 

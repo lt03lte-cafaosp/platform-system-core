@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (c) 2009, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,6 +173,23 @@ int __android_log_vprint(int prio, const char *tag, const char *fmt, va_list ap)
 
 int __android_log_print(int prio, const char *tag, const char *fmt, ...)
 {
+    va_list ap;
+    char buf[LOG_BUF_SIZE];    
+
+    va_start(ap, fmt);
+    vsnprintf(buf, LOG_BUF_SIZE, fmt, ap);
+    va_end(ap);
+
+    return __android_log_write(prio, tag, buf);
+}
+
+int __android_log_print_pri(int prio, const char *tag, const char *fmt, ...)
+{
+#ifdef NDEBUG
+    if (prio > ANDROID_LOG_WARN)
+      return 0;
+#endif
+
     va_list ap;
     char buf[LOG_BUF_SIZE];    
 

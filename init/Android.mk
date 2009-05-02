@@ -1,4 +1,5 @@
 # Copyright 2005 The Android Open Source Project
+# Copyright (c) 2009, Code Aurora Forum. All rights reserved.
 
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
@@ -15,6 +16,14 @@ LOCAL_SRC_FILES:= \
 ifeq ($(strip $(INIT_BOOTCHART)),true)
 LOCAL_SRC_FILES += bootchart.c
 LOCAL_CFLAGS    += -DBOOTCHART=1
+endif
+
+ifneq (, $(filter qsd8250_surf qsd8250_ffa, $(TARGET_PRODUCT)))
+  LOCAL_CFLAGS += -DSURF8K
+endif
+
+ifneq (, $(filter msm7201a_surf msm7201a_ffa, $(TARGET_PRODUCT)))
+  LOCAL_CFLAGS += -DSURF7201A
 endif
 
 LOCAL_MODULE:= init

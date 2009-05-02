@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (c) 2009, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,17 +93,16 @@ static struct perms_ devperms[] = {
     { "/dev/ashmem",        0666,   AID_ROOT,       AID_ROOT,       0 },
     { "/dev/binder",        0666,   AID_ROOT,       AID_ROOT,       0 },
 
-	    /* logger should be world writable (for logging) but not readable */
+	/* logger should be world writable (for logging) but not readable */
     { "/dev/log/",          0662,   AID_ROOT,       AID_LOG,        1 },
 
         /* these should not be world writable */
     { "/dev/android_adb",   0660,   AID_ADB,        AID_ADB,        0 },
     { "/dev/android_adb_enable",   0660,   AID_ADB,        AID_ADB,        0 },
-    { "/dev/ttyMSM0",       0600,   AID_BLUETOOTH,  AID_BLUETOOTH,  0 },
     { "/dev/ttyHS0",        0600,   AID_BLUETOOTH,  AID_BLUETOOTH,  0 },
     { "/dev/uinput",        0600,   AID_BLUETOOTH,  AID_BLUETOOTH,  0 },
     { "/dev/alarm",         0664,   AID_SYSTEM,     AID_RADIO,      0 },
-    { "/dev/tty0",          0660,   AID_ROOT,       AID_SYSTEM,     0 },
+    { "/dev/tty0",          0666,   AID_ROOT,       AID_SYSTEM,     0 },
     { "/dev/graphics/",     0660,   AID_ROOT,       AID_GRAPHICS,   1 },
     { "/dev/hw3d",          0660,   AID_SYSTEM,     AID_GRAPHICS,   0 },
     { "/dev/input/",        0660,   AID_ROOT,       AID_INPUT,      1 },
@@ -112,24 +112,38 @@ static struct perms_ devperms[] = {
     { "/dev/pmem_gpu",      0660,   AID_SYSTEM,     AID_GRAPHICS,   1 },
     { "/dev/pmem_adsp",     0660,   AID_SYSTEM,     AID_AUDIO,      1 },
     { "/dev/pmem_camera",   0660,   AID_SYSTEM,     AID_CAMERA,     1 },
+	{ "/dev/msm_camera",    0660,   AID_SYSTEM,     AID_CAMERA,     1 },
     { "/dev/oncrpc/",       0660,   AID_ROOT,       AID_SYSTEM,     1 },
     { "/dev/adsp/",         0660,   AID_SYSTEM,     AID_AUDIO,      1 },
-    { "/dev/mt9t013",       0660,   AID_SYSTEM,     AID_SYSTEM,     0 },
+    { "/dev/mt9t013",       0660,   AID_SYSTEM,     AID_SYSTEM,     1 },
+	{ "/dev/mt9d112",       0660,   AID_SYSTEM,     AID_SYSTEM,     1 },
+    { "/dev/mt9p012",       0660,   AID_SYSTEM,     AID_SYSTEM,     1 },
     { "/dev/akm8976_daemon",0640,   AID_COMPASS,    AID_SYSTEM,     0 },
     { "/dev/akm8976_aot",   0640,   AID_COMPASS,    AID_SYSTEM,     0 },
     { "/dev/akm8976_pffd",  0640,   AID_COMPASS,    AID_SYSTEM,     0 },
+#ifndef SURF8K
     { "/dev/msm_pcm_out",   0660,   AID_SYSTEM,     AID_AUDIO,      1 },
     { "/dev/msm_pcm_in",    0660,   AID_SYSTEM,     AID_AUDIO,      1 },
     { "/dev/msm_pcm_ctl",   0660,   AID_SYSTEM,     AID_AUDIO,      1 },
-    { "/dev/msm_snd",       0660,   AID_SYSTEM,     AID_AUDIO,      1 },
+    { "/dev/msm_snd",   0666,   AID_SYSTEM,     AID_AUDIO,      1 },
+#else
+    { "/dev/msm_pcm",       0666,   AID_SYSTEM,     AID_AUDIO,      1 },
+    { "/dev/msm_pcm_in",    0666,   AID_SYSTEM,     AID_AUDIO,      1 },
+    { "/dev/msm_aac",       0666,   AID_SYSTEM,     AID_AUDIO,      1 },
+    { "/dev/msm_voice",     0666,   AID_SYSTEM,     AID_AUDIO,      1 },
+    { "/dev/msm_audio_dev_ctrl",  0666,   AID_SYSTEM,     AID_AUDIO,      1 },
+#endif
     { "/dev/msm_mp3",       0660,   AID_SYSTEM,     AID_AUDIO,      1 },
     { "/dev/msm_audpre",    0660,   AID_SYSTEM,     AID_AUDIO,      0 },
     { "/dev/htc-acoustic",  0660,   AID_SYSTEM,     AID_AUDIO,      0 },
+    { "/dev/vdec",          0660,   AID_SYSTEM,     AID_SYSTEM,     0 },
     { "/dev/smd0",          0640,   AID_RADIO,      AID_RADIO,      0 },
     { "/dev/qmi",           0640,   AID_RADIO,      AID_RADIO,      0 },
     { "/dev/qmi0",          0640,   AID_RADIO,      AID_RADIO,      0 },
     { "/dev/qmi1",          0640,   AID_RADIO,      AID_RADIO,      0 },
     { "/dev/qmi2",          0640,   AID_RADIO,      AID_RADIO,      0 },
+    { "/dev/vdec",          0660,   AID_SYSTEM,     AID_SYSTEM,     0 },
+    { "/dev/q6venc",        0660,   AID_SYSTEM,     AID_SYSTEM,     0 },
     { NULL, 0, 0, 0, 0 },
 };
 

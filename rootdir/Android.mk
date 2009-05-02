@@ -4,8 +4,10 @@ include $(CLEAR_VARS)
 # files that live under /system/etc/...
 
 copy_from := \
+	etc/vold.conf \
 	etc/dbus.conf \
 	etc/init.goldfish.sh \
+	etc/init.qcom.bt.sh \
 	etc/hosts
 
 dont_copy := \
@@ -39,6 +41,15 @@ $(file) : $(LOCAL_PATH)/etc/init.goldfish.rc | $(ACP)
 	$(transform-prebuilt-to-target)
 ALL_PREBUILT += $(file)
 	
+file := $(TARGET_ROOT_OUT)/init.qcom.rc
+$(file) : $(LOCAL_PATH)/etc/init.qcom.rc | $(ACP)
+	$(transform-prebuilt-to-target)
+ALL_PREBUILT += $(file)
+
+file := $(TARGET_ROOT_OUT)/init.qcom.sh
+$(file) : $(LOCAL_PATH)/etc/init.qcom.sh | $(ACP)
+	$(transform-prebuilt-to-target)
+ALL_PREBUILT += $(file)
 
 # create some directories (some are mount points)
 DIRS := $(addprefix $(TARGET_ROOT_OUT)/, \

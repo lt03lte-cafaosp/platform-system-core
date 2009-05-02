@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2005 The Android Open Source Project
+ * Copyright (c) 2009, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +60,22 @@ extern "C" {
 #endif
 #endif
 
+#ifndef LOG_NDDEBUG
+#ifdef NDEBUG
+#define LOG_NDDEBUG 1
+#else
+#define LOG_NDDEBUG 0
+#endif
+#endif
+
+#ifndef LOG_NIDEBUG
+#ifdef NDEBUG
+#define LOG_NIDEBUG 1
+#else
+#define LOG_NIDEBUG 0
+#endif
+#endif
+
 /*
  * This is the local tag used for the following simplified
  * logging macros.  You can change this preprocessor definition
@@ -66,6 +83,46 @@ extern "C" {
  */
 #ifndef LOG_TAG
 #define LOG_TAG NULL
+#endif
+
+/* basic log macros for each level
+ */
+
+#ifndef LOGLOG_VERBOSE
+#if LOG_NDEBUG
+#define LOGLOG_VERBOSE(tag, ...) ((void)0)
+#else
+#define LOGLOG_VERBOSE(tag, ...) \
+    (void)android_printLog(ANDROID_LOG_VERBOSE, tag, __VA_ARGS__)
+#endif
+#endif
+
+#ifndef LOGLOG_DEBUG
+#if LOG_NDDEBUG
+#define LOGLOG_DEBUG(tag, ...) ((void)0)
+#else
+#define LOGLOG_DEBUG(tag, ...) \
+    (void)android_printLog(ANDROID_LOG_DEBUG, tag, __VA_ARGS__)
+#endif
+#endif
+
+#ifndef LOGLOG_INFO
+#if LOG_NIDEBUG
+#define LOGLOG_INFO(tag, ...) ((void)0)
+#else
+#define LOGLOG_INFO(tag, ...) \
+    (void)android_printLog(ANDROID_LOG_INFO, tag, __VA_ARGS__)
+#endif
+#endif
+
+#ifndef LOGLOG_WARN
+#define LOGLOG_WARN(tag, ...) \
+    (void)android_printLog(ANDROID_LOG_WARN, tag, __VA_ARGS__)
+#endif
+
+#ifndef LOGLOG_ERROR
+#define LOGLOG_ERROR(tag, ...) \
+    (void)android_printLog(ANDROID_LOG_ERROR, tag, __VA_ARGS__)
 #endif
 
 // ---------------------------------------------------------------------
@@ -77,7 +134,7 @@ extern "C" {
 #if LOG_NDEBUG
 #define LOGV(...)   ((void)0)
 #else
-#define LOGV(...) ((void)LOG(LOG_VERBOSE, LOG_TAG, __VA_ARGS__))
+#define LOGV(...) (LOGLOG_VERBOSE(LOG_TAG, __VA_ARGS__))
 #endif
 #endif
 
@@ -89,7 +146,7 @@ extern "C" {
 #else
 #define LOGV_IF(cond, ...) \
     ( (CONDITION(cond)) \
-    ? ((void)LOG(LOG_VERBOSE, LOG_TAG, __VA_ARGS__)) \
+    ? (LOGLOG_VERBOSE(LOG_TAG, __VA_ARGS__)) \
     : (void)0 )
 #endif
 #endif
@@ -98,41 +155,57 @@ extern "C" {
  * Simplified macro to send a debug log message using the current LOG_TAG.
  */
 #ifndef LOGD
-#define LOGD(...) ((void)LOG(LOG_DEBUG, LOG_TAG, __VA_ARGS__))
+#if LOG_NDDEBUG
+#define LOGD(...) ((void)0)
+#else
+#define LOGD(...) (LOGLOG_DEBUG(LOG_TAG, __VA_ARGS__))
+#endif
 #endif
 
 #ifndef LOGD_IF
+#if LOG_NDDEBUG
+#define LOGD_IF(cond, ...) ((void)0)
+#else
 #define LOGD_IF(cond, ...) \
     ( (CONDITION(cond)) \
-    ? ((void)LOG(LOG_DEBUG, LOG_TAG, __VA_ARGS__)) \
+    ? (LOGLOG_DEBUG(LOG_TAG, __VA_ARGS__)) \
     : (void)0 )
+#endif
 #endif
 
 /*
  * Simplified macro to send an info log message using the current LOG_TAG.
  */
 #ifndef LOGI
-#define LOGI(...) ((void)LOG(LOG_INFO, LOG_TAG, __VA_ARGS__))
+#if LOG_NIDEBUG
+#define LOGI(...) ((void)0)
+#else
+#define LOGI(...) (LOGLOG_INFO(LOG_TAG, __VA_ARGS__))
+#endif
 #endif
 
 #ifndef LOGI_IF
+#if LOG_NIDEBUG
+#define LOGI_IF(cond, ...) ((void)0)
+#else
 #define LOGI_IF(cond, ...) \
     ( (CONDITION(cond)) \
-    ? ((void)LOG(LOG_INFO, LOG_TAG, __VA_ARGS__)) \
+    ? (LOGLOG_INFO(LOG_TAG, __VA_ARGS__)) \
     : (void)0 )
+#endif
 #endif
 
 /*
  * Simplified macro to send a warning log message using the current LOG_TAG.
  */
 #ifndef LOGW
-#define LOGW(...) ((void)LOG(LOG_WARN, LOG_TAG, __VA_ARGS__))
+#define LOGW(...) (LOGLOG_WARN(LOG_TAG, __VA_ARGS__))
 #endif
 
 #ifndef LOGW_IF
 #define LOGW_IF(cond, ...) \
     ( (CONDITION(cond)) \
-    ? ((void)LOG(LOG_WARN, LOG_TAG, __VA_ARGS__)) \
+    ? (LOGLOG_WARN(LOG_TAG, __VA_ARGS__)) \
     : (void)0 )
 #endif
 
@@ -140,13 +213,13 @@ extern "C" {
  * Simplified macro to send an error log message using the current LOG_TAG.
  */
 #ifndef LOGE
-#define LOGE(...) ((void)LOG(LOG_ERROR, LOG_TAG, __VA_ARGS__))
+#define LOGE(...) (LOGLOG_ERROR(LOG_TAG, __VA_ARGS__))
 #endif
 
 #ifndef LOGE_IF
 #define LOGE_IF(cond, ...) \
     ( (CONDITION(cond)) \
-    ? ((void)LOG(LOG_ERROR, LOG_TAG, __VA_ARGS__)) \
+    ? (LOGLOG_ERROR(LOG_TAG, __VA_ARGS__)) \
     : (void)0 )
 #endif
 
@@ -247,7 +320,7 @@ extern "C" {
  */
 #ifndef LOG
 #define LOG(priority, tag, ...) \
-    LOG_PRI(ANDROID_##priority, tag, __VA_ARGS__)
+    LOG##priority(tag, __VA_ARGS__)
 #endif
 
 /*
@@ -255,7 +328,7 @@ extern "C" {
  */
 #ifndef LOG_PRI
 #define LOG_PRI(priority, tag, ...) \
-    android_printLog(priority, tag, __VA_ARGS__)
+    __android_log_print_pri(priority, tag, __VA_ARGS__)
 #endif
 
 /*

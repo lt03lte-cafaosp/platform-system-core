@@ -19,4 +19,4 @@ LOCAL_CFLAGS := -DCREATE_MOUNT_POINTS=0
 LOCAL_SHARED_LIBRARIES := libcutils
 
 # disabled - we are using vold now instead
-# include $(BUILD_EXECUTABLE)
+#include $(BUILD_EXECUTABLE)

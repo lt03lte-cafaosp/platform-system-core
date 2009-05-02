@@ -1,4 +1,5 @@
 // Copyright 2006 The Android Open Source Project
+// Copyright (c) 2009, Code Aurora Forum. All rights reserved.
 
 #include <cutils/logger.h>
 #include <cutils/logd.h>
@@ -20,8 +21,18 @@
 #include <sys/stat.h>
 #include <arpa/inet.h>
 
+#ifdef USE_DIAG
+#include <msgcfg.h>
+#include <msg.h>
+#include <diag_lsm.h>
+#endif
+
 #define DEFAULT_LOG_ROTATE_SIZE_KBYTES 16
 #define DEFAULT_MAX_ROTATED_LOGS 4
+
+#ifdef USE_DIAG
+#define MSG_SIZE 512
+#endif
 
 static AndroidLogFormat * g_logformat;
 
@@ -44,6 +55,22 @@ static int g_isBinary = 0;
 static int g_printBinary = 0;
 
 static EventTagMap* g_eventTagMap = NULL;
+
+#ifdef USE_DIAG
+static void printToDiag(AndroidLogEntry entry)
+{
+    char strMsg[MSG_SIZE];
+    char priChar;
+    
+    priChar = filterPriToChar(entry.priority);
+
+    /* Truncating messages > 512 bytes (max DIAG message size) */
+    snprintf(strMsg,MSG_SIZE,"%c/%s : %s",priChar,entry.tag,entry.message);
+    
+    /* Diag API */
+    MSG_SPRINTF_1(MSG_SSID_ANDROID_ADB, MSG_LEGACY_HIGH,"%s",strMsg);
+}
+#endif
 
 static int openLogFile (const char *pathname)
 {
@@ -120,6 +147,11 @@ static void processBuffer(struct logger_entry *buf)
     }
     if (err < 0)
         goto error;
+
+#ifdef USE_DIAG
+    /* Route the log message to Diag */
+    printToDiag(entry);
+#endif
 
     bytesWritten = android_log_filterAndPrintLogLine(
                         g_logformat, g_outFD, &entry);
@@ -286,6 +318,13 @@ int main (int argc, char **argv)
     char *log_device = strdup("/dev/"LOGGER_LOG_MAIN);
     const char *forceFilters = NULL;
 
+#ifdef USE_DIAG
+    /* Initialise Diag */
+    boolean bInit_Success = FALSE;
+
+    bInit_Success = Diag_LSM_Init(NULL);//, FALSE);
+#endif
+     
     g_logformat = android_log_format_new();
 
     if (argc == 2 && 0 == strcmp(argv[1], "--test")) {
@@ -563,6 +602,11 @@ int main (int argc, char **argv)
         android::g_eventTagMap = android_openEventTagMap(EVENT_TAG_MAP_FILE);
 
     android::readLogLines(logfd);
+
+#ifdef USE_DIAG
+    /* De-intialize Diag */
+    Diag_LSM_DeInit(); 
+#endif
 
     return 0;
 }

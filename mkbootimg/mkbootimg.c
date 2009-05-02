@@ -1,6 +1,7 @@
 /* tools/mkbootimg/mkbootimg.c
 **
 ** Copyright 2007, The Android Open Source Project
+** Copyright (c) 2009, Code Aurora Forum. All rights reserved.
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -163,6 +164,41 @@ int main(int argc, char **argv)
 
     strcpy(hdr.name, board);
 
+#if defined(SURF8K)
+    /* QSD 8K */
+    hdr.kernel_addr =  0x16008000;
+    hdr.ramdisk_addr = 0x1A000000;
+    if(saddr) {
+        hdr.second_addr =  0x00300000;
+    } else {
+        hdr.second_addr =  0x16F00000;
+    }
+    hdr.tags_addr   =  0x16000100;
+    hdr.page_size = pagesize;
+#elif defined(SURF7X2X)
+    /* MSM 7x25 and 7x27 */
+    hdr.kernel_addr =  0x00208000;
+    hdr.ramdisk_addr = 0x01200000;
+    if(saddr) {
+        hdr.second_addr =  0x00300000;
+    } else {
+        hdr.second_addr =  0x01100000;
+    }
+    hdr.tags_addr   =  0x00200100;
+    hdr.page_size = pagesize;
+#elif defined(SURF7X30)
+    /* MSM 7x30 */
+    hdr.kernel_addr =  0x40208000;
+    hdr.ramdisk_addr = 0x41200000;
+    if(saddr) {
+        hdr.second_addr =  0x40300000;
+    } else {
+        hdr.second_addr =  0x40F00000;
+    }
+    hdr.tags_addr   =  0x40200100;
+    hdr.page_size = pagesize;
+#else
+    /* MSM 7x00 and 7x01 */
     hdr.kernel_addr =  0x10008000;
     hdr.ramdisk_addr = 0x11000000;
     if(saddr) {
@@ -172,6 +208,7 @@ int main(int argc, char **argv)
     }
     hdr.tags_addr   =  0x10000100;
     hdr.page_size = pagesize;
+#endif
 
     memcpy(hdr.magic, BOOT_MAGIC, BOOT_MAGIC_SIZE);
 

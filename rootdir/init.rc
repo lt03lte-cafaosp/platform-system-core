@@ -1,3 +1,28 @@
+#  Copyright (c) 2009, Code Aurora Forum. All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are met:
+#     #  Redistributions of source code must retain the above copyright
+#        notice, this list of conditions and the following disclaimer.
+#     #  Redistributions in binary form must reproduce the above copyright
+#        notice, this list of conditions and the following disclaimer in the
+#        documentation and/or other materials provided with the distribution.
+#     #  Neither the name of Code Aurora nor
+#        the names of its contributors may be used to endorse or promote
+#        products derived from this software without specific prior written
+#        permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#  NON-INFRINGEMENT ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+#  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+#  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+#  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 on init
 
@@ -37,7 +62,7 @@ loglevel 3
 # mount mtd partitions
     # Mount /system rw first to give the filesystem a chance to save a checkpoint
     mount yaffs2 mtd@system /system 
-    mount yaffs2 mtd@system /system ro remount
+#    mount yaffs2 mtd@system /system ro remount
 
     # We chown/chmod /data again so because mount is run as root + defaults
     mount yaffs2 mtd@userdata /data nosuid nodev
@@ -110,6 +135,11 @@ on boot
     setprop ro.CONTENT_PROVIDER_MEM 5632
     setprop ro.EMPTY_APP_MEM 6144
 
+    setprop ro.com.google.location_feature 1
+#   EONS ALG (Enhanced One Name String)
+#   Setting variable ro.EONS_ALG_TYPE to 0 enables default ONS ALG
+#   Setting variable ro.EONS_ALG_TYPE to 1 enables EONS ALG
+    setprop ro.EONS_ALG_TYPE 0
 # Write value must be consistent with the above properties.
 # Note that the driver only supports 6 slots, so we have HOME_APP at the
 # same memory level as services.
@@ -160,6 +190,14 @@ on boot
     chown system system /sys/kernel/ipv4/tcp_rmem_def
     chown system system /sys/kernel/ipv4/tcp_rmem_max
     chown root radio /proc/cmdline
+    chown bluetooth bluetooth /sys/module/bluetooth_power/parameters/power
+    chown bluetooth bluetooth /proc/bluetooth/sleep/proto
+    chown system system /sys/module/sco/parameters/disable_esco
+    chmod 0660 /sys/module/bluetooth_power/parameters/power
+    chmod 0660 /proc/bluetooth/sleep/proto
+    chown bluetooth bluetooth /dev/ttyHS0
+    chmod 0660 /dev/ttyHS0
+    chmod 0666 /dev/msm_snd
 
 # Define TCP buffer sizes for various networks
 #   ReadMin, ReadInitial, ReadMax, WriteMin, WriteInitial, WriteMax,
@@ -190,6 +228,8 @@ on property:persist.service.adb.enable=1
 on property:persist.service.adb.enable=0
     stop adbd
 
+#ln -s /dev/oncrpc/30000002:00010000 /dev/oncrpc/30000002:00010001
+
 service servicemanager /system/bin/servicemanager
     user system
     critical
@@ -199,9 +239,6 @@ service servicemanager /system/bin/servicemanager
 service vold /system/bin/vold
     socket vold stream 0660 root mount
 
-#service mountd /system/bin/mountd
-#    socket mountd stream 0660 root mount
-
 service debuggerd /system/bin/debuggerd
 
 service ril-daemon /system/bin/rild
@@ -209,6 +246,7 @@ service ril-daemon /system/bin/rild
     socket rild-debug stream 660 radio system
     user root
     group radio cache inet misc
+
 
 service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
     socket zygote stream 666
@@ -254,3 +292,5 @@ service installd /system/bin/installd
 
 service flash_recovery /system/bin/flash_image recovery /system/recovery.img
     oneshot
+
+busybox --install 

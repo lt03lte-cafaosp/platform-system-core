@@ -791,6 +791,10 @@ static void _cb_volstopped_for_ums_enable(volume_t *v, void *arg)
 #if DEBUG_VOLMGR
     LOG_VOL("_cb_volstopped_for_ums_enable(%s):", v->mount_point);
 #endif
+
+    if(v->dev == NULL) 
+        return;
+
     devdir_path = blkdev_get_devpath(v->dev->disk);
 
     if ((rc = ums_enable(devdir_path, v->ums_path)) < 0) {
