@@ -50,7 +50,7 @@ failed ()
 
 start_hciattach ()
 {
-  /system/xbin/su bluetooth /system/bin/hciattach -n $QSOC_DEVICE $QSOC_TYPE $QSOC_BAUD &
+  /system/bin/hciattach -n $QSOC_DEVICE $QSOC_TYPE $QSOC_BAUD &
   hciattach_pid=$!
   logi "start_hciattach: pid = $hciattach_pid"
 }
