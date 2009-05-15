@@ -61,6 +61,8 @@ service hci_qcomm_init /system/bin/log -t qcom-bluetooth -p i "hci_qcomm_init se
 
 service port-bridge /system/bin/port-bridge /dev/smd0 /dev/ttyHSUSB0 &
 
+service qmuxd /system/bin/qmuxd &
+
 service hciattach /system/bin/sh /system/etc/init.qcom.bt.sh
     user bluetooth
     group qcom_oncrpc bluetooth net_bt_admin
