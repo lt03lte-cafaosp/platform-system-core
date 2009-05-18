@@ -4,8 +4,7 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/../../../vendor/qcom-proprietary/diag/include \
+LOCAL_C_INCLUDES := $(TARGET_OUT_HEADERS)/diag/include
 
 LOCAL_SRC_FILES:= logcat.cpp
 
