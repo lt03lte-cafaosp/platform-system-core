@@ -35,10 +35,6 @@ case "$target" in
         echo 245760 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
         ;;
 
-    "msm7627_surf")
-        echo 480000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-        ;;
-
     "qsd8250_surf" | "qsd8250_ffa")
         value=`getprop persist.maxcpukhz`
         case "$value" in
