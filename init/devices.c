@@ -1,4 +1,5 @@
 /*
+ * ncr
  * Copyright (C) 2007 The Android Open Source Project
  * Copyright (c) 2009, Code Aurora Forum. All rights reserved.
  *
@@ -113,7 +114,7 @@ static struct perms_ devperms[] = {
     { "/dev/pmem_adsp",     0660,   AID_SYSTEM,     AID_AUDIO,      1 },
     { "/dev/pmem_camera",   0660,   AID_SYSTEM,     AID_CAMERA,     1 },
 	{ "/dev/msm_camera",    0660,   AID_SYSTEM,     AID_CAMERA,     1 },
-    { "/dev/oncrpc/",       0660,   AID_ROOT,       AID_QCOM_ONCRPC,     1 },
+    { "/dev/oncrpc/",       0660,   AID_ROOT,       AID_SYSTEM,     1 },
     { "/dev/adsp/",         0660,   AID_SYSTEM,     AID_AUDIO,      1 },
     { "/dev/mt9t013",       0660,   AID_SYSTEM,     AID_SYSTEM,     1 },
 	{ "/dev/mt9d112",       0660,   AID_SYSTEM,     AID_SYSTEM,     1 },
