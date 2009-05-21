@@ -811,20 +811,6 @@ int main(int argc, char **argv)
 
     property_init();
     
-    /*
-     * On 7201A target, change the CPU frequency governor to ondemand
-     * after boot.
-     */
-#ifdef SURF7201A
-    fd = open("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", O_WRONLY);
-    if (fd >= 0) {
-        write(fd, "ondemand", 8);
-        close(fd);
-    } else {
-        ERROR("Unable to change the CPU frequency governor to ondemand (%d)", errno);
-    }
-#endif
-
     // only listen for keychords if ro.debuggable is true
     debuggable = property_get("ro.debuggable");
     if (debuggable && !strcmp(debuggable, "1")) {
