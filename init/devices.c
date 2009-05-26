@@ -130,11 +130,12 @@ static struct perms_ devperms[] = {
 #else
     { "/dev/msm_pcm",       0666,   AID_SYSTEM,     AID_AUDIO,      1 },
     { "/dev/msm_pcm_in",    0666,   AID_SYSTEM,     AID_AUDIO,      1 },
-    { "/dev/msm_aac",       0666,   AID_SYSTEM,     AID_AUDIO,      1 },
     { "/dev/msm_voice",     0666,   AID_SYSTEM,     AID_AUDIO,      1 },
     { "/dev/msm_audio_dev_ctrl",  0666,   AID_SYSTEM,     AID_AUDIO,      1 },
 #endif
     { "/dev/msm_mp3",       0660,   AID_SYSTEM,     AID_AUDIO,      1 },
+    { "/dev/msm_aac",       0660,   AID_SYSTEM,     AID_AUDIO,      1 },
+    { "/dev/msm_amrnb",     0660,   AID_SYSTEM,     AID_AUDIO,      1 },
     { "/dev/msm_voicememo", 0660,   AID_SYSTEM,     AID_AUDIO,      1 },
     { "/dev/msm_audpre",    0660,   AID_SYSTEM,     AID_AUDIO,      0 },
     { "/dev/htc-acoustic",  0660,   AID_SYSTEM,     AID_AUDIO,      0 },
