@@ -165,7 +165,7 @@ static struct fs_path_config android_dirs[] = {
 static struct fs_path_config android_files[] = {
     { 00440, AID_ROOT,      AID_SHELL,     "system/etc/init.goldfish.rc" },
     { 00550, AID_ROOT,      AID_SHELL,     "system/etc/init.goldfish.sh" },
-    { 00777, AID_SYSTEM,      AID_SYSTEM,      "system/etc/init.qcom.sdio.sh" },
+    { 00755, AID_SYSTEM,      AID_SYSTEM,      "system/etc/init.qcom.sdio.sh" },
     { 00440, AID_ROOT,      AID_SHELL,     "system/etc/init.trout.rc" },
     { 00550, AID_ROOT,      AID_SHELL,     "system/etc/init.ril" },
     { 00550, AID_ROOT,      AID_SHELL,     "system/etc/init.testmenu" },
