@@ -111,7 +111,6 @@ echo 1  > /sys/class/android_usb/f_mass_storage/lun/nofua
 case $target in
     "msm8960")
         socid=`cat /sys/devices/system/soc/soc0/id`
-#socid 109: 8064. Revisit later when 8064 target arrives
         case "$socid" in
             "109")
                 echo 0       > /sys/class/android_usb/android0/enable
@@ -122,14 +121,29 @@ case $target in
                 echo 1       > /sys/class/android_usb/android0/enable
             ;;
             *)
-                echo 0       > /sys/class/android_usb/android0/enable
-                echo 0x9025  > /sys/class/android_usb/android0/idProduct
-                echo 0x05C6  > /sys/class/android_usb/android0/idVendor
-                echo diag    > /sys/class/android_usb/android0/f_diag/clients
-                echo smd,tty > /sys/class/android_usb/android0/f_serial/transports
-                echo 1       > /sys/class/android_usb/android0/f_rmnet/instances
-                echo diag,adb,serial,rmnet,mass_storage    > /sys/class/android_usb/android0/functions
-                echo 1       > /sys/class/android_usb/android0/enable
+                case "$baseband" in
+                    "mdm")
+                        echo 0         > /sys/class/android_usb/android0/enable
+                        echo 0x9025    > /sys/class/android_usb/android0/idProduct
+                        echo 0x05C6    > /sys/class/android_usb/android0/idVendor
+                        echo diag      > /sys/class/android_usb/android0/f_diag/clients
+                        echo hsic,tty  > /sys/class/android_usb/android0/f_serial/transports
+                        echo hsic,hsic > /sys/class/android_usb/android0/f_rmnet/transports
+                        echo diag,adb,serial,rmnet,mass_storage    > /sys/class/android_usb/android0/functions
+                        echo 1         > /sys/class/android_usb/android0/enable
+                    ;;
+                    *)
+                        echo 0       > /sys/class/android_usb/android0/enable
+                        echo 0x9025  > /sys/class/android_usb/android0/idProduct
+                        echo 0x05C6  > /sys/class/android_usb/android0/idVendor
+                        echo diag    > /sys/class/android_usb/android0/f_diag/clients
+                        echo smd,tty > /sys/class/android_usb/android0/f_serial/transports
+                        echo smd,bam > /sys/class/android_usb/android0/f_rmnet/transports
+                        echo diag,adb,serial,rmnet,mass_storage    > /sys/class/android_usb/android0/functions
+                        echo 1       > /sys/class/android_usb/android0/enable
+                    ;;
+                esac
+            ;;
         esac
     ;;
     * )
