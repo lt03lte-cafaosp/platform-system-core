@@ -524,3 +524,9 @@ service mdnsd /system/bin/mdnsd
     socket mdnsd stream 0660 mdnsr inet
     disabled
     oneshot
+
+#alps sensor daemon
+service AcdApiDaemon /system/bin/AcdApiDaemon
+    class main
+    user compass
+    group compass misc input
