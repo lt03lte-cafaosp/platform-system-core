@@ -103,3 +103,7 @@
 
 #permissions for sensors
 /dev/msm_dsps             0660  system       system
+
+#permissions for alps sensor daemon
+/dev/alps_ad_io           0660  compass      system
+/dev/alps_ss_io           0660  compass      system
