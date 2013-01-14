@@ -59,7 +59,7 @@
 #define POWER_ON_KEY_TIME       (2 * MSEC_PER_SEC)
 #define UNPLUGGED_SHUTDOWN_TIME (10 * MSEC_PER_SEC)
 
-#define BATTERY_FULL_THRESH     95
+#define BATTERY_FULL_THRESH     100
 
 #define LAST_KMSG_PATH          "/proc/last_kmsg"
 #define LAST_KMSG_MAX_SZ        (32 * 1024)
@@ -754,6 +754,29 @@ static void update_screen_state(struct charger *charger, int64_t now)
     }
 }
 
+static void write_file(const char *file_path, const char *str)
+{
+    int fd = open(file_path, O_RDWR);
+    if (fd >= 0) {
+        write(fd, str, strnlen(str, 5));
+        close(fd);
+    }
+}
+
+void update_leds(int batt_cap)
+{
+    if (batt_cap < BATTERY_FULL_THRESH){
+        write_file("/sys/class/leds/red/brightness", "255");
+        write_file("/sys/class/leds/green/brightness", "0");
+        write_file("/sys/class/leds/blue/brightness", "0");
+    } else {
+        write_file("/sys/class/leds/red/brightness", "0");
+        write_file("/sys/class/leds/green/brightness", "255");
+        write_file("/sys/class/leds/blue/brightness", "0");
+    }
+    write_file("/sys/class/leds/red/device/blink", "0");
+}
+
 static int set_key_callback(int code, int value, void *data)
 {
     struct charger *charger = data;
@@ -918,6 +941,7 @@ static void event_loop(struct charger *charger)
          * screen transitions (animations, etc)
          */
         update_screen_state(charger, now);
+        update_leds(get_battery_capacity(charger));
 
         wait_next_event(charger, now);
     }
