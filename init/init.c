@@ -859,7 +859,11 @@ int main(int argc, char **argv)
     int signal_fd_init = 0;
     int keychord_fd_init = 0;
     bool is_charger = false;
+    bool is_eng = false;
 
+#if TARGET_BUILD_VARIANT == eng
+    is_eng = true;
+#endif
     if (!strcmp(basename(argv[0]), "ueventd"))
         return ueventd_main(argc, argv);
 
@@ -906,7 +910,7 @@ int main(int argc, char **argv)
     is_charger = !strcmp(bootmode, "charger");
 
     INFO("property init\n");
-    if (!is_charger)
+    if (is_eng || !is_charger)
         property_load_boot_defaults();
 
     INFO("reading config file\n");
@@ -922,7 +926,7 @@ int main(int argc, char **argv)
     action_for_each_trigger("init", action_add_queue_tail);
 
     /* skip mounting filesystems in charger mode */
-    if (!is_charger) {
+    if (atoi(property_get("ro.debuggable")) || !is_charger) {
         action_for_each_trigger("early-fs", action_add_queue_tail);
         action_for_each_trigger("fs", action_add_queue_tail);
         action_for_each_trigger("post-fs", action_add_queue_tail);
