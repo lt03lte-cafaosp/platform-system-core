@@ -505,3 +505,8 @@ service AcdApiDaemon /system/bin/AcdApiDaemon
     class main
     user compass
     group compass misc input
+
+service dynamic_max_tx /system/bin/dynamic_max_tx_power_limit
+    class main
+    user root
+    group system
