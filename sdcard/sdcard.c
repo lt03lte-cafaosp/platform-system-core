@@ -26,7 +26,6 @@
 #include <sys/uio.h>
 #include <dirent.h>
 #include <ctype.h>
-#include <cutils/properties.h>
 
 #include <private/android_filesystem_config.h>
 
@@ -963,7 +962,6 @@ int main(int argc, char **argv)
 {
     struct fuse fuse;
     char opts[256];
-    char value[PROPERTY_VALUE_MAX];
     int fd;
     int res;
     const char *path = NULL;
@@ -994,12 +992,6 @@ int main(int argc, char **argv)
 
         /* cleanup from previous instance, if necessary */
     umount2(MOUNT_POINT, 2);
-
-    /* checking "ro.fuse_sdcard" enable */
-    property_get("ro.fuse_sdcard", value, "true");
-    if (strcmp(value, "false") == 0) {
-        return -1;
-    }
 
     fd = open("/dev/fuse", O_RDWR);
     if (fd < 0){
