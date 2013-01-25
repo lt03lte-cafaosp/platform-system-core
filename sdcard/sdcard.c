@@ -72,7 +72,6 @@
 #define FUSE_UNKNOWN_INO 0xffffffff
 
 #define MOUNT_POINT "/storage/sdcard0"
-#define MOUNT_POINT_SECONDARY "/storage/sdcard1"
 
 struct handle {
     struct node *node;
@@ -996,6 +995,12 @@ int main(int argc, char **argv)
         /* cleanup from previous instance, if necessary */
     umount2(MOUNT_POINT, 2);
 
+    /* checking "ro.fuse_sdcard" enable */
+    property_get("ro.fuse_sdcard", value, "true");
+    if (strcmp(value, "false") == 0) {
+        return -1;
+    }
+
     fd = open("/dev/fuse", O_RDWR);
     if (fd < 0){
         ERROR("cannot open fuse device (%d)\n", errno);
@@ -1004,14 +1009,8 @@ int main(int argc, char **argv)
 
     sprintf(opts, "fd=%i,rootmode=40000,default_permissions,allow_other,"
             "user_id=%d,group_id=%d", fd, uid, gid);
-
-    property_get("persist.sys.emmcsdcard.enabled", value, "0");
-    if (strcmp(value, "1") == 0) {
-        res = mount("/dev/fuse", MOUNT_POINT, "fuse", MS_NOSUID | MS_NODEV, opts);
-    } else {
-        res = mount("/dev/fuse", MOUNT_POINT_SECONDARY, "fuse", MS_NOSUID | MS_NODEV, opts);
-    }
-
+    
+    res = mount("/dev/fuse", MOUNT_POINT, "fuse", MS_NOSUID | MS_NODEV, opts);
     if (res < 0) {
         ERROR("cannot mount fuse filesystem (%d)\n", errno);
         return -1;
