@@ -9,16 +9,17 @@ static int ok = EXIT_SUCCESS;
 static void printsize(long long n)
 {
     char unit = 'K';
-    n /= 1024;
-    if (n > 1024) {
-        n /= 1024;
+	float size = n;
+    size /= 1024;
+    if (size > 1024) {
+        size /= 1024;
         unit = 'M';
     }
-    if (n > 1024) {
-        n /= 1024;
+    if (size > 1024) {
+        size /= 1024;
         unit = 'G';
     }
-    printf("%4lld%c", n, unit);
+    printf("%.1f%c", size, unit);
 }
 
 static void df(char *s, int always) {
