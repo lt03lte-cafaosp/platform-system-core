@@ -3,6 +3,13 @@ include $(CLEAR_VARS)
 
 # files that live under /system/etc/...
 
+include $(CLEAR_VARS)
+LOCAL_MODULE		:= synaptics_ts_update.sh
+LOCAL_MODULE_TAGS	:= optional
+LOCAL_MODULE_CLASS	:= ETC
+LOCAL_SRC_FILES		:= etc/synaptics_ts_update.sh
+include $(BUILD_PREBUILT)
+
 copy_from := \
 	etc/dbus.conf \
 	etc/hosts

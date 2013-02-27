@@ -512,3 +512,8 @@ service dynamic_max_tx /system/bin/dynamic_max_tx_power_limit
     class main
     user root
     group system
+
+# synapticstouchscreen firmware updater
+service synaptics_ts_fw /system/bin/sh /system/etc/synaptics_ts_update.sh
+    class main
+    oneshot
