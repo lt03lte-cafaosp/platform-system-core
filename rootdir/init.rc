@@ -104,6 +104,8 @@ loglevel 3
     mkdir /dev/cpuctl/apps/bg_non_interactive
     chown system system /dev/cpuctl/apps/bg_non_interactive/tasks
     chmod 0666 /dev/cpuctl/apps/bg_non_interactive/tasks
+	chmod 0644 /dev/radio0
+	
     # 5.0 %
     write /dev/cpuctl/apps/bg_non_interactive/cpu.shares 52
     write /dev/cpuctl/apps/bg_non_interactive/cpu.rt_runtime_us 700000
