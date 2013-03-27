@@ -766,12 +766,12 @@ static void write_file(const char *file_path, const char *str)
 void update_leds(int batt_cap)
 {
     if (batt_cap < BATTERY_FULL_THRESH){
-        write_file("/sys/class/leds/red/brightness", "255");
+        write_file("/sys/class/leds/red/brightness", "60");
         write_file("/sys/class/leds/green/brightness", "0");
         write_file("/sys/class/leds/blue/brightness", "0");
     } else {
         write_file("/sys/class/leds/red/brightness", "0");
-        write_file("/sys/class/leds/green/brightness", "255");
+        write_file("/sys/class/leds/green/brightness", "60");
         write_file("/sys/class/leds/blue/brightness", "0");
     }
     write_file("/sys/class/leds/red/device/blink", "0");
