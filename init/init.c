@@ -632,6 +632,8 @@ static void import_kernel_nv(char *name, int for_emulator)
         cnt = snprintf(prop, sizeof(prop), "ro.boot.%s", boot_prop_name);
         if (cnt < PROP_NAME_MAX)
             property_set(prop, value);
+    } else if (!strcmp(name, "qrd_tablet_hw_adc")) {
+        property_set("ro.product.board", value);
     }
 }
 
