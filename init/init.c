@@ -632,8 +632,6 @@ static void import_kernel_nv(char *name, int for_emulator)
         cnt = snprintf(prop, sizeof(prop), "ro.boot.%s", boot_prop_name);
         if (cnt < PROP_NAME_MAX)
             property_set(prop, value);
-    } else if (!strcmp(name, "qrd_tablet_hw_adc")) {
-        property_set("ro.product.board", value);
     }
 }
 
@@ -651,11 +649,14 @@ static void export_kernel_boot_props(void)
         { "ro.boot.mode", "ro.bootmode", "unknown", },
         { "ro.boot.baseband", "ro.baseband", "unknown", },
         { "ro.boot.bootloader", "ro.bootloader", "unknown", },
+        { "ro.boot.product.board", "ro.product.board", "", },
     };
 
     for (i = 0; i < ARRAY_SIZE(prop_map); i++) {
         pval = property_get(prop_map[i].src_prop);
-        property_set(prop_map[i].dest_prop, pval ?: prop_map[i].def_val);
+        if (pval || (prop_map[i].def_val && prop_map[i].def_val[0] != '\0')) {
+            property_set(prop_map[i].dest_prop, pval ?: prop_map[i].def_val);
+        }
     }
 
     pval = property_get("ro.boot.console");
