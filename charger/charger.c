@@ -982,7 +982,7 @@ int main(int argc, char **argv)
         LOGE("Cannot load image\n");
         charger->surf_unknown = NULL;
     }
-
+    write_file("/sys/class/leds/lcd-backlight/brightness", "128");
     for (i = 0; i < charger->batt_anim->num_frames; i++) {
         struct frame *frame = &charger->batt_anim->frames[i];
 
