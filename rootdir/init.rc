@@ -517,3 +517,18 @@ service dynamic_max_tx /system/bin/dynamic_max_tx_power_limit
 service synaptics_ts_fw /system/bin/sh /system/etc/synaptics_ts_update.sh
     class main
     oneshot
+
+service qlogd /system/xbin/qlogd
+    class main
+    disabled
+on property:persist.sys.qlogd=1
+    start qlogd
+on property:persist.sys.qlogd=0
+    stop qlogd
+service rootagent /system/bin/sh /system/etc/init.qcom.rootagent.sh
+    disabled
+    oneshot
+on property:persist.sys.rootagent=1
+    start rootagent
+on property:persist.sys.rootagent=0
+    stop rootagent
