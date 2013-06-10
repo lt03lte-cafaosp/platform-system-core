@@ -875,7 +875,7 @@ static void process_key(struct charger *charger, int code, int64_t now)
             int64_t reboot_timeout = key->timestamp + POWER_ON_KEY_TIME;
             if (now >= reboot_timeout) {
                 LOGI("[%lld] rebooting\n", now);
-                android_reboot(ANDROID_RB_RESTART, 0, 0);
+                android_reboot(ANDROID_RB_RESTART2, 0, "reboot");
             } else {
                 /* if the key is pressed but timeout hasn't expired,
                  * make sure we wake up at the right-ish time to check
