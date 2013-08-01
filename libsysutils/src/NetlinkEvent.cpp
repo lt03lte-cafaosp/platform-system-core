@@ -75,6 +75,10 @@ void NetlinkEvent::dump() {
 bool NetlinkEvent::parseBinaryNetlinkMessage(char *buffer, int size) {
     size_t sz = size;
     const struct nlmsghdr *nh = (struct nlmsghdr *) buffer;
+    const int log_treshole = 50;
+    const int log_print_interval = 5000;
+    const int log_max_count = 30000;
+    int log_count = 0;
 
     while (NLMSG_OK(nh, sz) && (nh->nlmsg_type != NLMSG_DONE)) {
 
@@ -117,7 +121,14 @@ bool NetlinkEvent::parseBinaryNetlinkMessage(char *buffer, int size) {
             ulog_packet_msg_t *pm;
             size_t len = nh->nlmsg_len - sizeof(*nh);
             if (sizeof(*pm) > len) {
-                SLOGE("Got a short QLOG message\n");
+                if(log_count > log_max_count) {
+                  SLOGE("Got some short QLOG message which exceed the MAX count : %d, reset count.\n",log_max_count);
+                  log_count = 0;//out of the MAX count, clear the count
+                } else {
+                  if((log_count <= log_treshole) || ((log_count%log_print_interval) == 0))
+                    SLOGE("Got a short QLOG message for %d times\n",log_count);
+                }
+                log_count++;
                 continue;
             }
             pm = (ulog_packet_msg_t *)NLMSG_DATA(nh);
