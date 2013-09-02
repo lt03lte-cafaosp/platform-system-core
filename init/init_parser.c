@@ -643,6 +643,16 @@ void queue_builtin_action(int (*func)(int nargs, char **args), char *name)
 
 void action_add_queue_tail(struct action *act)
 {
+    struct listnode *node;
+
+    list_for_each(node, &action_queue) {
+        if (node == &act->qlist) {
+            ERROR("dublicated action_queue node: %s", act->name);
+            list_remove(node);
+            break;
+        }
+    }
+
     list_add_tail(&action_queue, &act->qlist);
 }
 
