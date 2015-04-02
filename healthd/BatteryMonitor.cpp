@@ -84,6 +84,8 @@ int BatteryMonitor::getBatteryHealth(const char* status) {
         { "Over voltage", BATTERY_HEALTH_OVER_VOLTAGE },
         { "Unspecified failure", BATTERY_HEALTH_UNSPECIFIED_FAILURE },
         { "Cold", BATTERY_HEALTH_COLD },
+        { "Warm", BATTERY_HEALTH_WARM },
+        { "Cool", BATTERY_HEALTH_COOL },
         { NULL, 0 },
     };
 
