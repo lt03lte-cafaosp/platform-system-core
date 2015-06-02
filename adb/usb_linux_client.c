@@ -71,6 +71,21 @@ struct desc_v1 {
     struct func_desc fs_descs, hs_descs;
 } __attribute__((packed));
 
+// in case this is compiled against an older kernel, define the recent
+// functionfs additions here
+#include <linux/version.h>
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3,18,0))
+struct usb_functionfs_descs_head_v2 {
+    __le32 magic;
+    __le32 length;
+    __le32 flags;
+} __attribute__((packed));
+#define FUNCTIONFS_DESCRIPTORS_MAGIC_V2 3
+#define FUNCTIONFS_HAS_FS_DESC          1
+#define FUNCTIONFS_HAS_HS_DESC          2
+#define FUNCTIONFS_HAS_SS_DESC          4
+#endif
+
 struct desc_v2 {
     struct usb_functionfs_descs_head_v2 header;
     // The rest of the structure depends on the flags in the header.
