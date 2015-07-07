@@ -291,7 +291,7 @@ static void healthd_mainloop(void) {
         int mode_timeout;
 
         mode_timeout = healthd_mode_ops->preparetowait();
-        if (timeout < 0 || (mode_timeout > 0 && mode_timeout < timeout))
+        if (timeout < 0 || (mode_timeout >= 0 && mode_timeout < timeout))
             timeout = mode_timeout;
         nevents = epoll_wait(epollfd, events, eventct, timeout);
 
