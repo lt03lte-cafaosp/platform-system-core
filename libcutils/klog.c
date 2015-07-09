@@ -38,15 +38,11 @@ void klog_set_level(int level) {
 
 void klog_init(void)
 {
-    static const char *name = "/dev/__kmsg__";
-
     if (klog_fd >= 0) return; /* Already initialized */
 
+    static const char* name = "/dev/__kmsg__";
     if (mknod(name, S_IFCHR | 0600, (1 << 8) | 11) == 0) {
-        klog_fd = open(name, O_WRONLY);
-        if (klog_fd < 0)
-                return;
-        fcntl(klog_fd, F_SETFD, FD_CLOEXEC);
+        klog_fd = open(name, O_WRONLY | O_CLOEXEC);
         unlink(name);
     }
 }
