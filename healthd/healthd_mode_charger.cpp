@@ -204,6 +204,7 @@ struct soc_led_color_mapping {
     int color;
 };
 
+/* Increasing battery charge percentage vs LED color mapping */
 struct soc_led_color_mapping soc_leds[3] = {
     {15, RED_LED},
     {90, RED_LED | GREEN_LED},
@@ -315,12 +316,13 @@ static int set_battery_soc_leds(int soc, bool blink)
 {
     int i, color, rc;
     static int old_color = 0;
+    int range_max = ARRAY_SIZE(soc_leds) - 1;
 
-    for (i = 0; i < (int)ARRAY_SIZE(soc_leds); i++) {
+    for (i = 0; i < range_max ; i++) {
         if (soc <= soc_leds[i].soc)
             break;
     }
-    color = soc_leds[i].color;
+    color = soc_leds[range_max].color;
 
     if (old_color != color) {
         if ((color == HVDCP_COLOR_MAP) && blink) {
