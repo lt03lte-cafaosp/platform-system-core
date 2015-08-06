@@ -322,7 +322,7 @@ static int set_battery_soc_leds(int soc, bool blink)
         if (soc <= soc_leds[i].soc)
             break;
     }
-    color = soc_leds[range_max].color;
+    color = soc_leds[i].color;
 
     if (old_color != color) {
         if ((color == HVDCP_COLOR_MAP) && blink) {
