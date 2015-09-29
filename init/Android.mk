@@ -37,7 +37,7 @@ LOCAL_SRC_FILES:= \
 	watchdogd.c \
 	vendor_init.c
 
-LOCAL_CFLAGS    += -Wno-unused-parameter
+LOCAL_CFLAGS    += -Wno-unused-parameter -DALLOW_DISABLE_SELINUX=1
 
 ifeq ($(strip $(INIT_BOOTCHART)),true)
 LOCAL_SRC_FILES += bootchart.c
@@ -45,7 +45,7 @@ LOCAL_CFLAGS    += -DBOOTCHART=1
 endif
 
 ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))
-LOCAL_CFLAGS += -DALLOW_LOCAL_PROP_OVERRIDE=1 -DALLOW_DISABLE_SELINUX=1
+LOCAL_CFLAGS += -DALLOW_LOCAL_PROP_OVERRIDE=1
 endif
 ifdef DOLBY_UDC
   LOCAL_CFLAGS += -DDOLBY_UDC
