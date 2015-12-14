@@ -620,6 +620,12 @@ service media /system/bin/mediaserver
     group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc mediadrm qcom_diag
     ioprio rt 4
 
+service concam /system/bin/qcom-concam-webserver
+    class main
+    user root
+    group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc mediadrm qcom_diag sdcard_pics sdcard_av media_rw
+    ioprio rt 4
+
 # One shot invocation to deal with encrypted volume.
 service defaultcrypto /system/bin/vdc --wait cryptfs mountdefaultencrypted
     disabled
