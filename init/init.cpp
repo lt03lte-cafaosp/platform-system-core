@@ -627,15 +627,19 @@ void execute_one_command() {
 
 static int wait_for_coldboot_done_action(int nargs, char **args) {
     Timer t;
-
+    int timeout = 0;
+#ifdef SLOW_BOARD
+    timeout = 10000;
+#else
+    timeout = 1;
+#endif
     NOTICE("Waiting for %s...\n", COLDBOOT_DONE);
     // Any longer than 1s is an unreasonable length of time to delay booting.
     // If you're hitting this timeout, check that you didn't make your
     // sepolicy regular expressions too expensive (http://b/19899875).
-    if (wait_for_file(COLDBOOT_DONE, 1)) {
+    if (wait_for_file(COLDBOOT_DONE, timeout)) {
         ERROR("Timed out waiting for %s\n", COLDBOOT_DONE);
     }
-
     NOTICE("Waiting for %s took %.2fs.\n", COLDBOOT_DONE, t.duration());
     return 0;
 }
