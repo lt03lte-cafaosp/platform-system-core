@@ -28,4 +28,6 @@ extern int add_dev_perms(const char *name, const char *attr,
                          mode_t perm, unsigned int uid,
                          unsigned int gid, unsigned short prefix);
 int get_device_fd();
+extern void check_init_state(void);
+extern void handle_sd_plug_in_out(int in_out);
 #endif	/* _INIT_DEVICES_H */

@@ -28,6 +28,7 @@
 static const char *coldboot_done = "/dev/.coldboot_done";
 static const char *sd_card = "/dev/mmcblk1p1";
 static const char *block_path = "/sys/class/android_usb/f_mass_storage/lun/file";
+static const char *usb_power_path = "/sys/devices/msm_dwc3/power_supply/usb/present";
 
 int mtd_name_to_number(const char *name);
 int create_socket(const char *name, int type, mode_t perm,

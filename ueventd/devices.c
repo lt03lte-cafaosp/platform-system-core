@@ -46,6 +46,7 @@
 #define FIRMWARE_DIR2   "/vendor/firmware"
 
 static int device_fd = -1;
+static int u_disk_state = 0;
 
 struct uevent {
     const char *action;
@@ -258,29 +259,72 @@ static int read_from_file(const char *path, char *buf, ssize_t count)
     return (rv < 0) ? -errno : rv;
 }
 
+void check_init_state(void)
+{
+	char data[2];
+	struct stat info;
+
+	if (access(block_path, W_OK) < 0) {
+		printf("block path not writable\n");
+		return;
+	}
+
+	/* sd plug-in? */
+	if (stat(sd_card, &info) < 0)
+		return;
+
+	/* sd card has been mounted?  */
+	if(u_disk_state)
+		return;
+
+	if (access(usb_power_path, R_OK) < 0) {
+		printf("power supply path not readable\n");
+		return;
+	}
+
+	/* use usb power state to judge if usb is present */
+	read_from_file(usb_power_path, data, 1);
+	data[1] = '\0';
+	if(!strncmp(data, "1", 1))
+		handle_sd_plug_in_out(1);
+	else if(!strncmp(data, "0", 1))
+		handle_sd_plug_in_out(0);
+	else
+		return;
+}
+
 /* 1: in,  0: out */
 void handle_sd_plug_in_out(int in_out)
 {
-#if 1
     int i;
     struct stat info;
     char emp_str[2] = " ";
 
-	if (access(block_path, W_OK) < 0)
+	if (access(block_path, W_OK) < 0) {
 		printf("block path not writable\n");
+		return;
+	}
 
     if(in_out) {
-	if (stat(sd_card, &info) < 0)
-		return;
+    	if (stat(sd_card, &info) < 0)
+    		return;
 
-	i = write_to_file(block_path, sd_card);
-	if (i < 0 ) printf("add sd failed, ret = %d\n", i);
-    } else {
-	//TODO, there is an I/O error here, we can use this error to write empty string
+    	/* sd card has been mounted?  */
+    	if(u_disk_state)
+    		return;
+
+    	i = write_to_file(block_path, sd_card);
+    	if (i < 0 ) {
+    		printf("add sd failed, ret = %d\n", i);
+    	} else {
+    		u_disk_state = 1;
+    	}
+	} else {
+    	//TODO, there is an I/O error here, we can use this error to write empty string
 		i = write_to_file(block_path, emp_str);
 		//if (i < 0 ) printf("remove sd failed, ret =%d\n", i);
+		u_disk_state = 0;
     }
-#endif
 }
 
 static void handle_device_event(struct uevent *uevent)
@@ -309,15 +353,17 @@ static void handle_device_event(struct uevent *uevent)
 
     if(!strcmp(uevent->action, "change")) {
     	if(!strncmp(uevent->subsystem, "power_supply", 12)) {
-    	    char data[2];
-    	    if (access("/sys/devices/msm_dwc3/power_supply/usb/present", R_OK) < 0)
-    	    	printf("power supply path not readable\n");
+    		char data[2];
+    		if (access(usb_power_path, R_OK) < 0) {
+    			printf("power supply path not readable\n");
+    			return;
+    		}
 
-    	    /* use usb power state to judge if usb is present */
-    	    read_from_file("/sys/devices/msm_dwc3/power_supply/usb/present", data, 1);
-    	    data[1] = '\0';
-    	    if(!strncmp(data, "1", 1))
-    	    	handle_sd_plug_in_out(1);
+    		/* use usb power state to judge if usb is present */
+    		read_from_file(usb_power_path, data, 1);
+    		data[1] = '\0';
+    		if(!strncmp(data, "1", 1))
+    			handle_sd_plug_in_out(1);
     	    else if(!strncmp(data, "0", 1))
     	    	handle_sd_plug_in_out(0);
     	    else
@@ -543,6 +589,7 @@ void device_init(void)
     struct stat info;
     int fd;
 
+    u_disk_state = 0; /* init sd as not mounted */
     device_fd = open_uevent_socket();
     if(device_fd < 0)
         return;

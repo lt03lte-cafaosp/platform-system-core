@@ -45,6 +45,12 @@ int main(int argc, char **argv)
     ufd.events = POLLIN;
     ufd.fd = get_device_fd();
 
+    /* check if we need to mount in case of below
+     * 1: reboot device
+     * 2: stop and restart this service
+     * */
+    check_init_state();
+
     while(1) {
         ufd.revents = 0;
         nr = poll(&ufd, 1, -1);
