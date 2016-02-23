@@ -85,7 +85,7 @@ struct fs_path_config {
 };
 
 /* system appears as rootfs / on MDM */
-/* userdata appears as /usr on MDM   */
+/* userdata appears as /data on MDM   */
 
 /* Rules for directories.
 ** These rules are applied based on "first match", so they
@@ -139,6 +139,17 @@ static struct fs_path_config android_files[] = {
     { 00600, AID_ROOT,      AID_ROOT,      "system/etc/shadow" },
     { 00755, AID_ROOT,      AID_ROOT,      "system/etc/udhcpc.d/*" },
     { 00644, AID_ROOT,      AID_ROOT,      "system/etc/*" },
+    { 04755, AID_ROOT,      AID_ROOT,      "system/usr/bin/chage" },
+    { 04755, AID_ROOT,      AID_ROOT,      "system/usr/bin/chfn.shadow" },
+    { 04755, AID_ROOT,      AID_ROOT,      "system/usr/bin/chsh.shadow" },
+    { 04755, AID_ROOT,      AID_ROOT,      "system/usr/bin/newgrp.shadow" },
+    { 04755, AID_ROOT,      AID_ROOT,      "system/usr/bin/su" },
+    { 04755, AID_ROOT,      AID_ROOT,      "system/usr/sbin/pppd" },
+    { 00755, AID_ROOT,      AID_ROOT,      "system/usr/bin/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      "system/usr/sbin/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      "system/usr/lib/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      "system/usr/kernel-tests/*" },
+    { 00644, AID_ROOT,      AID_ROOT,      "system/usr/*" },
     { 00644, AID_ROOT,      AID_ROOT,      "system/*" },
 
     /* /usr permissions */
