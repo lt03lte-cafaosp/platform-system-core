@@ -30,4 +30,9 @@ extern int add_dev_perms(const char *name, const char *attr,
 int get_device_fd();
 extern void check_init_state(void);
 extern void handle_sd_plug_in_out(int in_out);
+extern void exit_handler(int num);
+
+static void handle_mtp_plug_in_out(int in_out);
+static int check_usb_status(void);
+static int check_mtp_mode(void);
 #endif	/* _INIT_DEVICES_H */

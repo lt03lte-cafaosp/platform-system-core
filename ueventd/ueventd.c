@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
 #include <ctype.h>
 #include <private/android_filesystem_config.h>
 
@@ -39,7 +40,8 @@ int main(int argc, char **argv)
     int nr;
     char tmp[32];
 
-
+    /* Recieve child exit signal, currently only mtpserver. */
+    signal(SIGCHLD, exit_handler);
     device_init();
 
     ufd.events = POLLIN;

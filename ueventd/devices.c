@@ -20,6 +20,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -28,6 +29,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <string.h>
+#include <syslog.h>
 
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -47,11 +49,13 @@
 
 static int device_fd = -1;
 static int u_disk_state = 0;
+static pid_t mtp_pid = 0;
 
 struct uevent {
     const char *action;
     const char *path;
     const char *subsystem;
+    const char *usb_state;
     const char *firmware;
     const char *partition_name;
     int partition_num;
@@ -86,7 +90,6 @@ static int open_uevent_socket(void)
     return s;
 }
 
-
 #if LOG_UEVENTS
 
 static inline suseconds_t get_usecs(void)
@@ -110,6 +113,7 @@ static void parse_event(const char *msg, struct uevent *uevent)
     uevent->action = "";
     uevent->path = "";
     uevent->subsystem = "";
+    uevent->usb_state = "";
     uevent->firmware = "";
     uevent->major = -1;
     uevent->minor = -1;
@@ -127,6 +131,9 @@ static void parse_event(const char *msg, struct uevent *uevent)
         } else if(!strncmp(msg, "SUBSYSTEM=", 10)) {
             msg += 10;
             uevent->subsystem = msg;
+        } else if(!strncmp(msg, "USB_STATE=", 10)) {
+            msg += 10;
+            uevent->usb_state = msg;
         } else if(!strncmp(msg, "FIRMWARE=", 9)) {
             msg += 9;
             uevent->firmware = msg;
@@ -234,7 +241,7 @@ static int write_to_file(const char *path, const char *value)
 
     close(fd);
     if (ret < 0)  
-	return -errno;
+    return -errno;
     else 
         return 0;
 }
@@ -251,8 +258,8 @@ static int read_from_file(const char *path, char *buf, ssize_t count)
         return -errno;
 
     do {
-	pos += rv;
-	rv = read(fd, buf + pos, count - pos);
+    pos += rv;
+    rv = read(fd, buf + pos, count - pos);
     } while (rv > 0);
 
     close(fd);
@@ -261,36 +268,45 @@ static int read_from_file(const char *path, char *buf, ssize_t count)
 
 void check_init_state(void)
 {
-	char data[2];
-	struct stat info;
+    char data[2];
+    struct stat info;
 
-	if (access(block_path, W_OK) < 0) {
-		printf("block path not writable\n");
-		return;
-	}
+    if (check_mtp_mode() == 0) {
+        if (access(block_path, W_OK) < 0) {
+            printf("block path not writable\n");
+            return;
+        }
 
-	/* sd plug-in? */
-	if (stat(sd_card, &info) < 0)
-		return;
+        /* sd plug-in? */
+        if (stat(sd_card, &info) < 0)
+            return;
 
-	/* sd card has been mounted?  */
-	if(u_disk_state)
-		return;
+        /* sd card has been mounted?  */
+        if(u_disk_state)
+            return;
 
-	if (access(usb_power_path, R_OK) < 0) {
-		printf("power supply path not readable\n");
-		return;
-	}
+        if (access(usb_power_path, R_OK) < 0) {
+            printf("power supply path not readable\n");
+            return;
+        }
 
-	/* use usb power state to judge if usb is present */
-	read_from_file(usb_power_path, data, 1);
-	data[1] = '\0';
-	if(!strncmp(data, "1", 1))
-		handle_sd_plug_in_out(1);
-	else if(!strncmp(data, "0", 1))
-		handle_sd_plug_in_out(0);
-	else
-		return;
+        /* use usb power state to judge if usb is present */
+        read_from_file(usb_power_path, data, 1);
+        data[1] = '\0';
+        if(!strncmp(data, "1", 1))
+            handle_sd_plug_in_out(1);
+        else if(!strncmp(data, "0", 1))
+            handle_sd_plug_in_out(0);
+        else
+            return;
+    } else {
+        /* use usb composite dirver state to judge if mtp driver is present */
+        if(check_usb_status() == 1)
+            handle_mtp_plug_in_out(1);
+        else
+            handle_mtp_plug_in_out(0);
+        return;
+    }
 }
 
 /* 1: in,  0: out */
@@ -300,31 +316,84 @@ void handle_sd_plug_in_out(int in_out)
     struct stat info;
     char emp_str[2] = " ";
 
-	if (access(block_path, W_OK) < 0) {
-		printf("block path not writable\n");
-		return;
-	}
+    if (access(block_path, W_OK) < 0) {
+        printf("block path not writable\n");
+        return;
+    }
 
     if(in_out) {
-    	if (stat(sd_card, &info) < 0)
-    		return;
+        if (stat(sd_card, &info) < 0)
+            return;
 
-    	/* sd card has been mounted?  */
-    	if(u_disk_state)
-    		return;
+        /* sd card has been mounted?  */
+        if(u_disk_state)
+            return;
 
-    	i = write_to_file(block_path, sd_card);
-    	if (i < 0 ) {
-    		printf("add sd failed, ret = %d\n", i);
-    	} else {
-    		u_disk_state = 1;
-    	}
-	} else {
-    	//TODO, there is an I/O error here, we can use this error to write empty string
-		i = write_to_file(block_path, emp_str);
-		//if (i < 0 ) printf("remove sd failed, ret =%d\n", i);
-		u_disk_state = 0;
+        i = write_to_file(block_path, sd_card);
+        if (i < 0 ) {
+            printf("add sd failed, ret = %d\n", i);
+        } else {
+            u_disk_state = 1;
+        }
+    } else {
+        //TODO, there is an I/O error here, we can use this error to write empty string
+        i = write_to_file(block_path, emp_str);
+        u_disk_state = 0;
     }
+}
+
+/* 1: in,  0: out */
+static void handle_mtp_plug_in_out(int in_out)
+{
+    if (in_out) {
+        printf("run mtpserver\n");
+        mtp_pid = fork();
+        if(!mtp_pid) {
+            execl("/usr/bin/mtpserver", "mtpserver", NULL);
+            exit(-1);
+        } else if (mtp_pid < 0) {
+            printf("could not create child process to execute mtp server module\n");
+        }
+    } else if (in_out == 0 && mtp_pid > 0) {
+        kill(mtp_pid, SIGTERM);
+        waitpid(mtp_pid, NULL, 0);
+        mtp_pid = 0;
+    }
+    return;
+}
+
+static int check_mtp_mode(void)
+{
+    FILE *fd;
+    char buffer[128];
+    int mtp_flag = 0;
+
+    fd = fopen("/sys/class/android_usb/android0/functions", "r");
+    while (fgets(buffer, 128, fd)) {
+        if (strstr(buffer, "mtp,adb") != NULL) {
+            mtp_flag = 1;
+            break;
+        }
+    }
+    fclose(fd);
+    return mtp_flag;
+}
+
+static int check_usb_status(void)
+{
+    FILE *fp;
+    char buffer[16];
+    int usb_status = 0;
+
+    fp = fopen("/sys/class/android_usb/android0/state", "r");
+    while(fgets(buffer, 16, fp)) {
+        if (strstr(buffer, "CONFIGURED") != NULL) {
+            usb_status = 1;
+            break;
+        }
+    }
+    fclose(fp);
+    return usb_status;
 }
 
 static void handle_device_event(struct uevent *uevent)
@@ -337,49 +406,59 @@ static void handle_device_event(struct uevent *uevent)
     /* do we have a name? */
     name = strrchr(uevent->path, '/');
     if(!name)
-    	return;
+        return;
     name++;
 
     if (!strcmp(uevent->action,"add")){
-    	/* add block */
-    	if(!strncmp(uevent->subsystem, "block", 5)) {
-    		/* SD card plug in */
-    		if(!strncmp(name, "mmcblk1p1", 9)) {
-    			handle_sd_plug_in_out(1);
-    			return;
-    		}
-    	}
+        /* add block */
+        if(!strncmp(uevent->subsystem, "block", 5) && (check_mtp_mode() == 0)) {
+            /* SD card plug in */
+            if(!strncmp(name, "mmcblk1p1", 9)) {
+                handle_sd_plug_in_out(1);
+                return;
+            }
+        }
     }
 
     if(!strcmp(uevent->action, "change")) {
-    	if(!strncmp(uevent->subsystem, "power_supply", 12)) {
-    		char data[2];
-    		if (access(usb_power_path, R_OK) < 0) {
-    			printf("power supply path not readable\n");
-    			return;
-    		}
+        if(check_mtp_mode() == 0) {
+            if(!strncmp(uevent->subsystem, "power_supply", 12)) {
+                char data[2];
+                if (access(usb_power_path, R_OK) < 0) {
+                    printf("power supply path not readable\n");
+                    return;
+                }
 
-    		/* use usb power state to judge if usb is present */
-    		read_from_file(usb_power_path, data, 1);
-    		data[1] = '\0';
-    		if(!strncmp(data, "1", 1))
-    			handle_sd_plug_in_out(1);
-    	    else if(!strncmp(data, "0", 1))
-    	    	handle_sd_plug_in_out(0);
-    	    else
-    	    	return;
-    	}
+                /* use usb power state to judge if usb is present */
+                read_from_file(usb_power_path, data, 1);
+                data[1] = '\0';
+                if(!strncmp(data, "1", 1))
+                    handle_sd_plug_in_out(1);
+                else if(!strncmp(data, "0", 1))
+                    handle_sd_plug_in_out(0);
+                else
+                    return;
+            }
+        } else {
+            if (!strncmp(uevent->usb_state, "CONFIGURED", 10)) {//USB has been configured
+                /* USB plug in */
+                handle_mtp_plug_in_out(1);
+            } else if (!strncmp(uevent->usb_state, "DISCONNECTED", 12)) {//USB has been disconnected
+                /* USB plug out */
+                handle_mtp_plug_in_out(0);
+            }
+        }
     }
 
     if(!strcmp(uevent->action, "remove")) {
-    	/* add block */
-    	if(!strncmp(uevent->subsystem, "block", 5)) {
-    		/* SD card plug out*/
-    		if(!strncmp(name, "mmcblk1p1", 9)) {
-    			handle_sd_plug_in_out(0);
-    			return;
-    		}
-    	}
+        /* add block */
+        if(!strncmp(uevent->subsystem, "block", 5)) {
+            /* SD card plug out*/
+            if(!strncmp(name, "mmcblk1p1", 9) && (check_mtp_mode() == 0)) {
+                handle_sd_plug_in_out(0);
+                return;
+            }
+        }
     }
 }
 
@@ -615,4 +694,29 @@ void device_init(void)
 int get_device_fd()
 {
     return device_fd;
+}
+
+void exit_handler(int num) {
+    int ret, status;
+    int pid = waitpid(-1, &status, WNOHANG);
+
+    // Currently only handle mtpserver exit.
+    if(mtp_pid != 0 && pid == mtp_pid && WIFEXITED(status)) {
+        syslog(LOG_INFO, "ueventd: The child %d exit with code %d\n", pid, WEXITSTATUS(status));
+        if (WEXITSTATUS(status) != 0) {
+            syslog(LOG_INFO,"ueventd: mtp_pid exit unexpected, switch to mass_storage\n");
+
+            pid = fork();
+            if(!pid) {
+                execl("/bin/sh", "sh", "/usr/bin/setusbcomposition", "mass_storage", NULL);
+                exit(-1);
+            } else if (pid < 0) {
+                syslog(LOG_INFO, "ueventd: could not create child process to execute mtp server module\n");
+            } else {
+                do {
+                    ret = waitpid(pid, NULL, 0);
+                } while (ret == -1 && errno == EINTR);
+            }
+        }
+    }
 }
