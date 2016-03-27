@@ -18,8 +18,6 @@
 #define LOG_TAG "libutils.threads"
 
 #include <utils/threads.h>
-#include <utils/Log.h>
-
 #include <cutils/sched_policy.h>
 
 #include <stdio.h>
@@ -28,6 +26,10 @@
 #include <errno.h>
 #include <assert.h>
 #include <unistd.h>
+
+#include <arch/linux-arm/OEConfig.h>
+#undef HAVE_ANDROID_OS
+#include <loghack.h>
 
 #if defined(HAVE_PTHREADS)
 # include <pthread.h>
@@ -300,6 +302,7 @@ void androidSetCreateThreadFunc(android_create_thread_fn func)
     gCreateThreadFn = func;
 }
 
+#ifdef HAVE_ANDROID_OS
 pid_t androidGetTid()
 {
 #ifdef HAVE_GETTID
@@ -309,7 +312,7 @@ pid_t androidGetTid()
 #endif
 }
 
-#ifdef HAVE_ANDROID_OS
+//#ifdef HAVE_ANDROID_OS
 int androidSetThreadPriority(pid_t tid, int pri)
 {
     int rc = 0;

@@ -33,6 +33,46 @@
 #define LOGW(...)   LOG("W", __VA_ARGS__)
 #define LOGE(...)   LOG("E", __VA_ARGS__)
 #define LOG_ALWAYS_FATAL(...)   do { LOGE(__VA_ARGS__); exit(1); } while (0)
+
+#ifndef LOG_ALWAYS_FATAL_IF
+#define LOG_ALWAYS_FATAL_IF(cond, ...) \
+  do {                                 \
+    if(cond) {                         \
+      LOGE(__VA_ARGS__);               \
+      exit(1);                         \
+     }                                 \
+  } while (0)
+#endif
+
+#ifndef ALOGW
+#define ALOGW(...) ((void)LOGW(__VA_ARGS__))
+#endif
+
+#ifndef ALOGE
+#define ALOGE(...) ((void)LOGE(__VA_ARGS__))
+#endif
+
+#ifndef ALOGW_IF
+#define ALOGW_IF(cond, ...)       \
+  do { \
+    if (cond) {                   \
+        (void)LOGW( __VA_ARGS__); \
+    }                             \
+  } while (0)
+#endif
+
+#ifndef LOG_FATAL
+#define LOG_FATAL(...) LOG_ALWAYS_FATAL(__VA_ARGS__)
+#endif
+
+#ifndef LOG_FATAL_IF
+#define LOG_FATAL_IF(cond, ...) LOG_ALWAYS_FATAL_IF(cond, __VA_ARGS__)
+#endif
+
+#ifndef ALOG_ASSERT
+#define ALOG_ASSERT(cond, ...) LOG_FATAL_IF(!(cond), __VA_ARGS__)
+#endif
+
 #endif
 
 #endif // _CUTILS_LOGHACK_H

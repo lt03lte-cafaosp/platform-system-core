@@ -91,5 +91,6 @@
           usb/Makefile \
           fs_mgr/Makefile \
           mkbootimg/Makefile \
-          ueventd/Makefile
+          ueventd/Makefile \
+          libutils/Makefile
   ])

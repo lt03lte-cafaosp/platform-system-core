@@ -17,7 +17,6 @@
 #include <utils/String16.h>
 
 #include <utils/Debug.h>
-#include <utils/Log.h>
 #include <utils/Unicode.h>
 #include <utils/String8.h>
 #include <utils/threads.h>
@@ -26,6 +25,10 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include <arch/linux-arm/OEConfig.h>
+#undef HAVE_ANDROID_OS
+#define LOG_TAG "libutils.string16"
+#include <loghack.h>
 
 namespace android {
 

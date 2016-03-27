@@ -277,9 +277,11 @@ TYPE* Vector<TYPE>::editArray() {
 
 template<class TYPE> inline
 const TYPE& Vector<TYPE>::operator[](size_t index) const {
+#ifdef HAVE_ANDROID_OS
     LOG_FATAL_IF(index>=size(),
             "%s: index=%u out of range (%u)", __PRETTY_FUNCTION__,
             int(index), int(size()));
+#endif
     return *(array() + index);
 }
 

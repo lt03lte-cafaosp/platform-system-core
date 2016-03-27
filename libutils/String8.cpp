@@ -18,14 +18,17 @@
 #include <stdint.h>
 
 #include <utils/String8.h>
-
-#include <utils/Log.h>
 #include <utils/Unicode.h>
 #include <utils/SharedBuffer.h>
 #include <utils/String16.h>
 #include <utils/threads.h>
 
 #include <ctype.h>
+
+#include <arch/linux-arm/OEConfig.h>
+#undef HAVE_ANDROID_OS
+#define LOG_TAG "libutils.string8"
+#include <loghack.h>
 
 /*
  * Functions outside android is below the namespace android, since they use

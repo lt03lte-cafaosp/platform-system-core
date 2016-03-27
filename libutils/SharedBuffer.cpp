@@ -19,9 +19,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <log/log.h>
 #include <utils/SharedBuffer.h>
 #include <utils/Atomic.h>
+
+#include <arch/linux-arm/OEConfig.h>
+#undef HAVE_ANDROID_OS
+#define LOG_TAG "libutils.sharedbuffer"
+#include <loghack.h>
 
 // ---------------------------------------------------------------------------
 

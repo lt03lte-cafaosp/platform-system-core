@@ -20,8 +20,6 @@
 #include <utils/RefBase.h>
 
 #include <utils/Atomic.h>
-#include <utils/CallStack.h>
-#include <utils/Log.h>
 #include <utils/threads.h>
 
 #include <stdlib.h>
@@ -32,6 +30,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <arch/linux-arm/OEConfig.h>
+#undef HAVE_ANDROID_OS
+#include <loghack.h>
+
 // compile with refcounting debugging enabled
 #define DEBUG_REFS                      0
 
@@ -40,7 +42,7 @@
 #define DEBUG_REFS_ENABLED_BY_DEFAULT   0
 
 // whether callstack are collected (significantly slows things down)
-#define DEBUG_REFS_CALLSTACK_ENABLED    1
+#define DEBUG_REFS_CALLSTACK_ENABLED    0
 
 // folder where stack traces are saved when DEBUG_REFS is enabled
 // this folder needs to exist and be writable

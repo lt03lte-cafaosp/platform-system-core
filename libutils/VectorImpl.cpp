@@ -15,12 +15,14 @@
  */
 
 #define LOG_TAG "Vector"
+#include <arch/linux-arm/OEConfig.h>
+#undef HAVE_ANDROID_OS
+#include <loghack.h>
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <cutils/log.h>
 #include <safe_iop.h>
 
 #include <utils/Errors.h>
@@ -28,7 +30,6 @@
 #include <utils/VectorImpl.h>
 
 /*****************************************************************************/
-
 
 namespace android {
 
