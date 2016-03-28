@@ -94,7 +94,7 @@ case "$1" in
 		then
 			/usr/bin/usb/boot_hsusb_composition n
 
-			if [ "$SOFTAP_W_DUN" == "Y" ]
+			if [ "$SOFTAP_W_DUN" = "Y" ]
 			then
 				echo "DUN+SOFTAP mode is enabled."
 				echo 1  > /sys/devices/virtual/android_usb/android0/f_serial/dun_w_softap_enable
