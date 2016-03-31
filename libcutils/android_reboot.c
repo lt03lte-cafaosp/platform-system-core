@@ -15,13 +15,14 @@
  */
 
 #include <unistd.h>
-#include <sys/reboot.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/reboot.h>
 #include <linux/reboot.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include <syscall.h>
 
 #include <cutils/android_reboot.h>
 
@@ -119,8 +120,8 @@ int android_reboot(int cmd, int flags, char *arg)
             break;
 
         case ANDROID_RB_RESTART2:
-            ret = __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2,
-                           LINUX_REBOOT_CMD_RESTART2, arg);
+            ret = syscall(SYS_reboot, LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2,
+                          LINUX_REBOOT_CMD_RESTART2, (char *)arg);
             break;
 
         default:

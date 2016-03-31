@@ -46,7 +46,7 @@ cutilsinclude_HEADERS = $(abs_top_srcdir)/include/cutils/abort_socket.h \
 # NOTE: Only supports builds of shared/static libraries for the target
 
 common_sources := array.c
-common_sources := android_reboot.c
+common_sources += android_reboot.c
 common_sources += hashmap.c
 common_sources += atomic.c
 common_sources += native_handle.c
@@ -108,6 +108,7 @@ endif # !ARM
 lib_LTLIBRARIES := libcutils.la
 libcutils_la_SOURCES := $(libcutils_a_SOURCES)
 libcutils_la_CPPFLAGS := $(libcutils_a_CPPFLAGS)
+libcutils_la_LIBADD  := ../liblog/liblog.la
 
 pkgconfigdir := $(libdir)/pkgconfig
 pkgconfig_DATA := libcutils.pc

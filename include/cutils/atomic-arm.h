@@ -78,7 +78,9 @@ extern inline void android_atomic_release_store(int32_t value,
 
 #if defined(__thumb__)
 extern int android_atomic_cas(int32_t old_value, int32_t new_value,
-                              volatile int32_t *ptr);
+                              volatile int32_t *ptr) {
+    return -1;
+}
 #elif defined(__ARM_HAVE_LDREX_STREX)
 extern inline int android_atomic_cas(int32_t old_value, int32_t new_value,
                                      volatile int32_t *ptr)
@@ -164,7 +166,10 @@ extern inline int32_t android_atomic_swap(int32_t new_value,
 
 #if defined(__thumb__)
 extern int32_t android_atomic_add(int32_t increment,
-                                  volatile int32_t *ptr);
+                                  volatile int32_t *ptr)
+{
+    return -1;
+}
 #elif defined(__ARM_HAVE_LDREX_STREX)
 extern inline int32_t android_atomic_add(int32_t increment,
                                          volatile int32_t *ptr)
