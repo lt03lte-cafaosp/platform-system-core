@@ -64,6 +64,8 @@
 #include "ueventd.h"
 #include "watchdogd.h"
 
+#define MAX_PARALLEL_THREADS 8
+
 struct selabel_handle *sehandle;
 struct selabel_handle *sehandle_prop;
 
@@ -83,6 +85,62 @@ static const char *ENV[32];
 bool waiting_for_exec = false;
 
 static int epoll_fd = -1;
+
+static std::vector<std::string> dir_list;
+
+static void *start_restorecon(void* arg) {
+    char full_path[PATH_MAX] = {0};
+
+    snprintf(full_path, sizeof(full_path), "/sys/%s", (char*)arg);
+    restorecon_recursive(full_path);
+    return NULL;
+}
+
+/* Gets the list of entires under the dir_path and creates
+** a thread for each entry in the dir_list.
+**
+** Creates MAX_PARALLEL_THREADS threads in parallel at given time
+** and iterate till the size of dir_list
+*/
+
+int mt_restorecon_recursive(std::string dir_path) {
+    int getdir_status = -1;
+    unsigned int taskId = 0;
+    unsigned int threadCount = 0;
+    unsigned int threadjoin = 0;
+    pthread_t *restorecon_thread;
+
+    getdir_status = get_dirlist(dir_path, dir_list);
+
+    if (getdir_status < 0 || dir_list.size() <= 0) {
+        return STATUS_FAILURE;
+    }
+
+    restorecon_thread = (pthread_t*)calloc(dir_list.size(), sizeof(pthread_t));
+    if (restorecon_thread == NULL) {
+        return STATUS_FAILURE;
+    }
+    pthread_attr_t tattr;
+
+    pthread_attr_init(&tattr);
+    pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_JOINABLE);
+
+    while (taskId < dir_list.size()) {
+        for (threadCount = 0; threadCount < MAX_PARALLEL_THREADS &&
+                taskId < dir_list.size(); threadCount++) {
+            pthread_create(&restorecon_thread[taskId], &tattr, start_restorecon,
+                    (void*)dir_list[taskId].c_str());
+            taskId++;
+        }
+        for (; threadjoin < taskId; threadjoin++) {
+            pthread_join(restorecon_thread[threadjoin], NULL);
+        }
+    }
+    free(restorecon_thread);
+    dir_list.clear();
+    std::vector<std::string>().swap(dir_list);
+    return STATUS_OK;
+}
 
 void register_epoll_handler(int fd, void (*fn)()) {
     epoll_event ev;
@@ -1064,7 +1122,10 @@ int main(int argc, char** argv) {
     restorecon("/dev");
     restorecon("/dev/socket");
     restorecon("/dev/__properties__");
-    restorecon_recursive("/sys");
+
+    if (mt_restorecon_recursive("/sys/") == STATUS_FAILURE) {
+        restorecon_recursive("/sys");
+    }
 
     epoll_fd = epoll_create1(EPOLL_CLOEXEC);
     if (epoll_fd == -1) {

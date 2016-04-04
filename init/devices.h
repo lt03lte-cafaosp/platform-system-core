@@ -18,6 +18,13 @@
 #define _INIT_DEVICES_H
 
 #include <sys/stat.h>
+#include <string>
+#include <vector>
+#include <pthread.h>
+#include <linux/limits.h>
+
+#define STATUS_OK           0
+#define STATUS_FAILURE      -1
 
 extern void handle_device_fd();
 extern void device_init(void);
@@ -26,5 +33,6 @@ extern int add_dev_perms(const char *name, const char *attr,
                          unsigned int gid, unsigned short prefix,
                          unsigned short wildcard);
 int get_device_fd();
+int get_dirlist(std::string dir, std::vector<std::string> &list);
 
 #endif	/* _INIT_DEVICES_H */

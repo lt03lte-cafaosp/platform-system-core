@@ -50,6 +50,7 @@
 #include "property_service.h"
 
 #define SYSFS_PREFIX    "/sys"
+#define MAX_PARALLEL_THREADS 8
 static const char *firmware_dirs[] = { "/etc/firmware",
                                        "/vendor/firmware",
                                        "/firmware/image" };
@@ -97,6 +98,8 @@ struct platform_node {
 static list_declare(sys_perms);
 static list_declare(dev_perms);
 static list_declare(platform_names);
+
+static std::vector<std::string> dir_list;
 
 int add_dev_perms(const char *name, const char *attr,
                   mode_t perm, unsigned int uid, unsigned int gid,
@@ -981,6 +984,62 @@ static void coldboot(const char *path)
     }
 }
 
+static void *start_coldboot(void* arg) {
+    char full_path[PATH_MAX] = {0};
+
+    snprintf(full_path, sizeof(full_path), "/sys/devices/%s", (char*)arg);
+    coldboot(full_path);
+    return NULL;
+}
+
+/* Gets the list of entires under the dir_path and creates
+** a thread for each entry in the dir_list.
+**
+** Creates MAX_PARALLEL_THREADS threads in parallel at given time
+** and iterate till the size of dir_list
+*/
+
+int mt_coldboot(std::string dir_path) {
+    int getdir_status = -1;
+    unsigned int taskId = 0;
+    unsigned int threadCount = 0;
+    unsigned int threadjoin = 0;
+    pthread_t *coldboot_thread;
+
+    getdir_status = get_dirlist(dir_path, dir_list);
+    /* dir_list should contain minimum one entry, otherwise
+     * return failure
+     */
+    if (getdir_status < 0 || dir_list.size() <= 0) {
+        return STATUS_FAILURE;
+    }
+
+    coldboot_thread = (pthread_t*)calloc(dir_list.size(), sizeof(pthread_t));
+    if (coldboot_thread == NULL) {
+        return STATUS_FAILURE;
+    }
+    pthread_attr_t tattr;
+
+    pthread_attr_init(&tattr);
+    pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_JOINABLE);
+    while (taskId < dir_list.size()) {
+        for (threadCount = 0; threadCount < MAX_PARALLEL_THREADS &&
+                taskId < dir_list.size(); threadCount++) {
+            pthread_create(&coldboot_thread[taskId], &tattr, start_coldboot,
+                (void*)dir_list[taskId].c_str());
+            taskId++;
+        }
+
+        for (; threadjoin < taskId; threadjoin++) {
+            pthread_join(coldboot_thread[threadjoin], NULL);
+        }
+    }
+    free(coldboot_thread);
+    dir_list.clear();
+    std::vector<std::string>().swap(dir_list);
+    return STATUS_OK;
+}
+
 void device_init() {
     sehandle = NULL;
     if (is_selinux_enabled() > 0) {
@@ -1003,7 +1062,9 @@ void device_init() {
     Timer t;
     coldboot("/sys/class");
     coldboot("/sys/block");
-    coldboot("/sys/devices");
+    if (mt_coldboot("/sys/devices/") != STATUS_OK) {
+        coldboot("/sys/devices");
+    }
     close(open(COLDBOOT_DONE, O_WRONLY|O_CREAT|O_CLOEXEC, 0000));
     NOTICE("Coldboot took %.2fs.\n", t.duration());
 }
@@ -1011,4 +1072,28 @@ void device_init() {
 int get_device_fd()
 {
     return device_fd;
+}
+
+/* Read the directory entries 1 level down in dir path and
+** fill the list vector with the entries.
+*/
+
+int get_dirlist(std::string dir, std::vector<std::string> &list)
+{
+    DIR *dp = NULL;
+    struct dirent *dirp = NULL;
+
+    if ((dp = opendir(dir.c_str())) == NULL) {
+        ERROR("Failed to open %s directory with -%d", dir.c_str(), errno);
+        return -errno;
+    }
+
+    while ((dirp = readdir(dp)) != NULL) {
+            if (std::string(dirp->d_name) != "." &&
+                    std::string(dirp->d_name) != "..") {
+                list.push_back(std::string(dirp->d_name));
+            }
+    }
+    closedir(dp);
+    return STATUS_OK;
 }
