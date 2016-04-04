@@ -64,6 +64,9 @@ case "$1" in
 			*9640* )
 			echo 16384 > /sys/module/g_android/parameters/rndis_dl_max_xfer_size
 			;;
+			*californium* )
+			echo 16384 > /sys/module/g_android/parameters/gsi_in_rndis_aggr_size
+			;;
 		esac
 
 		# enable debug message
