@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <cutils/mspace.h>
 
-#include "tinyutils/KeyedVector.h"
+#include "utils/KeyedVector.h"
 #include "tinyutils/smartpointer.h"
 
 namespace android {
