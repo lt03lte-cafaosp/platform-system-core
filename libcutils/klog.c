@@ -82,7 +82,7 @@ void klog_write(int level, const char* fmt, ...) {
 void printMarker(const char *makerName)
 {
     FILE *fptr = NULL;
-    fptr = fopen("/sys/bootkpi/marker_entry", "w");
+    fptr = fopen("/sys/kernel/debug/bootkpi/kpi_values", "w");
         if (NULL != fptr) {
             (makerName == NULL) ? fprintf(fptr,"%s", "DefaultMarker")
                    : fprintf(fptr,"%s", makerName);
