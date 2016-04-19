@@ -99,7 +99,7 @@ void print_maps(struct pid_info_t* info)
     int major, minor;
     char device[10];
     long int inode;
-    char file[PATH_MAX];
+    char file[1024];
 
     strncat(info->path, "maps", sizeof(info->path));
 
@@ -107,8 +107,8 @@ void print_maps(struct pid_info_t* info)
     if (!maps)
         goto out;
 
-    while (fscanf(maps, "%*x-%*x %*s %zx %5s %ld %s\n", &offset, device, &inode,
-            file) == 4) {
+    while (fscanf(maps, "%*x-%*x %*s %zx %5s %ld %1023s\n",
+                  &offset, device, &inode, file) == 4) {
         // We don't care about non-file maps
         if (inode == 0 || !strcmp(device, "00:00"))
             continue;
