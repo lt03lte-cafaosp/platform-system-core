@@ -618,13 +618,13 @@ service media /system/bin/mediaserver
     class main
     user media
     group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc mediadrm qcom_diag sdcard_pics sdcard_av media_rw
+    onrestart restart concam
     ioprio rt 4
 
-service concam /system/bin/concam-webserver-zygote
+service concam /system/vendor/bin/concam-webserver-zygote
     class main
-    user root
-    group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc mediadrm qcom_diag sdcard_pics sdcard_av media_rw
-    ioprio rt 4
+    user  media
+    group media camera audio inet
 
 # One shot invocation to deal with encrypted volume.
 service defaultcrypto /system/bin/vdc --wait cryptfs mountdefaultencrypted
