@@ -51,6 +51,9 @@ case `cat ${TARGET_DIR}` in
 	*californium* )
 		res="californium";
 		;;
+	*8053* )
+                res="8053";
+                ;;
 	* )
 		res="none"
 		;;
