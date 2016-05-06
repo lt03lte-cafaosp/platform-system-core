@@ -370,7 +370,7 @@ static int check_mtp_mode(void)
 
     fd = fopen("/sys/class/android_usb/android0/functions", "r");
     while (fgets(buffer, 128, fd)) {
-        if (strstr(buffer, "mtp,adb") != NULL) {
+        if (strstr(buffer, "mtp") != NULL) {
             mtp_flag = 1;
             break;
         }
@@ -419,28 +419,9 @@ static void handle_device_event(struct uevent *uevent)
             }
         }
     }
-
     if(!strcmp(uevent->action, "change")) {
-        if(check_mtp_mode() == 0) {
-            if(!strncmp(uevent->subsystem, "power_supply", 12)) {
-                char data[2];
-                if (access(usb_power_path, R_OK) < 0) {
-                    printf("power supply path not readable\n");
-                    return;
-                }
-
-                /* use usb power state to judge if usb is present */
-                read_from_file(usb_power_path, data, 1);
-                data[1] = '\0';
-                if(!strncmp(data, "1", 1))
-                    handle_sd_plug_in_out(1);
-                else if(!strncmp(data, "0", 1))
-                    handle_sd_plug_in_out(0);
-                else
-                    return;
-            }
-        } else {
-            if (!strncmp(uevent->usb_state, "CONFIGURED", 10)) {//USB has been configured
+        if(check_mtp_mode() != 0) { // mtp mode
+	    if (!strncmp(uevent->usb_state, "CONFIGURED", 10)) {//USB has been configured
                 /* USB plug in */
                 handle_mtp_plug_in_out(1);
             } else if (!strncmp(uevent->usb_state, "DISCONNECTED", 12)) {//USB has been disconnected
