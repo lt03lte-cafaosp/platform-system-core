@@ -45,8 +45,6 @@
 #include <cutils/atomic-x86.h>
 #elif defined(__sh__)
 /* implementation is in atomic-android-sh.c */
-#else
-#error atomic operations are unsupported
 #endif
 
 #if ANDROID_SMP == 0
