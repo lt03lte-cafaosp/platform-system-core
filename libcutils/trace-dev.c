@@ -18,7 +18,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <pthread.h>
-#include <stdatomic.h>
+#include <cutils/stdatomic.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
