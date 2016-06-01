@@ -70,6 +70,10 @@ int WEAK socket_local_client(const char *name, int namespaceId, int type)
 
 #define LISTEN_BACKLOG 4
 
+#ifndef PAGE_SIZE
+# define PAGE_SIZE 4096
+#endif
+
 /* Documented in header file. */
 int WEAK socket_make_sockaddr_un(const char *name, int namespaceId,
                                  struct sockaddr_un *p_addr, socklen_t *alen)

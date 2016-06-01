@@ -18,8 +18,9 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
-#include <sys/_system_properties.h>
+#include <sys/system_properties.h>
 
 #include <android/log.h>
 
@@ -33,7 +34,7 @@ static void refresh_cache(struct cache *cache, const char *key)
 {
     uint32_t serial;
     char buf[PROP_VALUE_MAX];
-
+#if 0
     if (!cache->pinfo) {
         cache->pinfo = __system_property_find(key);
         if (!cache->pinfo) {
@@ -46,6 +47,7 @@ static void refresh_cache(struct cache *cache, const char *key)
     }
     cache->serial = serial;
     __system_property_read(cache->pinfo, 0, buf);
+#endif
     cache->c = buf[0];
 }
 
@@ -88,7 +90,7 @@ static int __android_log_level(const char *tag, int def)
 
     pthread_mutex_lock(&lock);
 
-    current_global_serial = __system_property_area_serial();
+//    current_global_serial = __system_property_area_serial();
 
     if (taglen) {
         uint32_t current_local_serial = current_global_serial;
