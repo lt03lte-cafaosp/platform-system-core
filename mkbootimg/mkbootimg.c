@@ -77,8 +77,9 @@ int usage(void)
 static unsigned char padding[16384] = { 0, };
 
 static void print_id(const uint8_t *id, size_t id_len) {
+    unsigned i = 0;
     printf("0x");
-    for (unsigned i = 0; i < id_len; i++) {
+    for (i = 0; i < id_len; i++) {
         printf("%02x", id[i]);
     }
     printf("\n");

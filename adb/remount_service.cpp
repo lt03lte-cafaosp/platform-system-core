@@ -27,6 +27,7 @@
 #include <sys/mount.h>
 #include <unistd.h>
 
+#include <memory>
 #include <string>
 
 #include "adb.h"

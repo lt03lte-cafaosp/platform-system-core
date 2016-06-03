@@ -29,12 +29,12 @@
 #include <time.h>
 #include <sys/swap.h>
 #include <dirent.h>
-#include <ext4.h>
 #include <ext4_sb.h>
 #include <ext4_crypt_init_extensions.h>
 
 #include <linux/loop.h>
 #include <private/android_filesystem_config.h>
+#include <cutils/fs.h>
 #include <cutils/android_reboot.h>
 #include <cutils/partition_utils.h>
 #include <cutils/properties.h>
@@ -263,7 +263,7 @@ static int fs_match(char *in1, char *in2)
 static int device_is_debuggable() {
     int ret = -1;
     char value[PROP_VALUE_MAX];
-    ret = __system_property_get("ro.debuggable", value);
+    ret = property_get("ro.debuggable", value,NULL);
     if (ret < 0)
         return ret;
     return strcmp(value, "1") ? 0 : 1;
@@ -272,7 +272,7 @@ static int device_is_debuggable() {
 static int device_is_secure() {
     int ret = -1;
     char value[PROP_VALUE_MAX];
-    ret = __system_property_get("ro.secure", value);
+    ret = property_get("ro.secure", value,NULL);
     /* If error, we want to fail secure */
     if (ret < 0)
         return 1;
@@ -282,7 +282,7 @@ static int device_is_secure() {
 static int device_is_force_encrypted() {
     int ret = -1;
     char value[PROP_VALUE_MAX];
-    ret = __system_property_get("ro.vold.forceencryption", value);
+    ret = property_get("ro.vold.forceencryption", value,NULL);
     if (ret < 0)
         return 0;
     return strcmp(value, "1") ? 0 : 1;

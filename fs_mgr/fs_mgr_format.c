@@ -28,6 +28,8 @@
 #include "make_ext4fs.h"
 #include "fs_mgr_priv.h"
 
+#define off64_t off_t
+
 extern struct fs_info info;     /* magic global from ext4_utils */
 extern void reset_ext4fs_info();
 

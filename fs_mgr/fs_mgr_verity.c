@@ -38,10 +38,12 @@
 #include "mincrypt/sha256.h"
 
 #include "ext4_sb.h"
-#include "squashfs_utils.h"
+//#include "squashfs_utils.h"
 
 #include "fs_mgr_priv.h"
 #include "fs_mgr_priv_verity.h"
+
+#define off64_t off_t
 
 #define FSTAB_PREFIX "/fstab."
 
@@ -169,7 +171,7 @@ static int invalidate_table(char *table, int table_length)
 
     return -1;
 }
-
+#if 0
 static int squashfs_get_target_device_size(char *blk_device, uint64_t *device_size)
 {
     struct squashfs_info sq_info;
@@ -181,6 +183,7 @@ static int squashfs_get_target_device_size(char *blk_device, uint64_t *device_si
         return -1;
     }
 }
+#endif
 
 static int ext4_get_target_device_size(char *blk_device, uint64_t *device_size)
 {
@@ -221,11 +224,13 @@ static int get_fs_size(char *fs_type, char *blk_device, uint64_t *device_size) {
             ERROR("Failed to get ext4 fs size on %s.", blk_device);
             return -1;
         }
+#if 0
     } else if (!strcmp(fs_type, "squashfs")) {
         if (squashfs_get_target_device_size(blk_device, device_size) < 0) {
             ERROR("Failed to get squashfs fs size on %s.", blk_device);
             return -1;
         }
+#endif
     } else {
         ERROR("%s: Unsupported filesystem for verity.", fs_type);
         return -1;
