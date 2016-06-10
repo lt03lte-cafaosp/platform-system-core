@@ -21,6 +21,9 @@
 #include <string.h>
 #include <sys/mount.h>
 #include <unistd.h>
+#ifdef USE_GLIB
+#include <glib.h>
+#endif
 
 #include "fs_mgr_priv.h"
 

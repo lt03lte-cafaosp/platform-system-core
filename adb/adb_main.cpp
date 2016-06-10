@@ -19,9 +19,11 @@
 #include "sysdeps.h"
 
 #include <errno.h>
+#include <grp.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 
 #include "adb.h"
 #include "adb_auth.h"
@@ -38,8 +40,10 @@
 #include "private/android_filesystem_config.h"
 #include "selinux/selinux.h"
 
+#ifdef ADB_QEMU
 #include "qemu_tracing.h"
 #endif
+#endif //!ADB_HOST
 
 static void adb_cleanup(void)
 {
@@ -110,6 +114,8 @@ static void drop_capabilities_bounding_set_if_needed() {
 
 static bool should_drop_privileges() {
 #if defined(ALLOW_ADBD_ROOT)
+    // Always run ADB as root.
+    return false;
     char value[PROPERTY_VALUE_MAX];
 
     // The emulator is never secure, so don't drop privileges there.
@@ -401,9 +407,11 @@ int main(int argc, char **argv) {
 
     adb_trace_init();
 
+#ifdef ADB_QEMU
     /* If adbd runs inside the emulator this will enable adb tracing via
      * adb-debug qemud service in the emulator. */
     adb_qemu_trace_init();
+#endif
 
     D("Handling main()\n");
     return adb_main(0, DEFAULT_ADB_PORT);

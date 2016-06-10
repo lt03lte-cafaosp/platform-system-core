@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <cstring>
 #include <string>
 
 #include "base/macros.h"  // For TEMP_FAILURE_RETRY on Darwin.

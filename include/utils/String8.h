@@ -25,6 +25,7 @@
 #include <string.h> // for strcmp
 #include <stdarg.h>
 
+#define OS_PATH_SEPARATOR '/'
 // ---------------------------------------------------------------------------
 
 namespace android {
