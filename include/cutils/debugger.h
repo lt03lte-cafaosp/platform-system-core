@@ -19,6 +19,7 @@
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
+#include <stdint.h>
 
 __BEGIN_DECLS
 

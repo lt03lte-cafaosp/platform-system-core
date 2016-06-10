@@ -25,7 +25,9 @@
 #include <string.h>
 
 #include <cutils/android_reboot.h>
-
+#ifdef LINUX_ENABLED
+#include <linux/reboot.h>
+#endif
 #define UNUSED __attribute__((unused))
 
 /* Check to see if /proc/mounts contains any writeable filesystems

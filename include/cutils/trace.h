@@ -18,7 +18,7 @@
 #define _LIBS_CUTILS_TRACE_H
 
 #include <inttypes.h>
-#include <stdatomic.h>
+#include <cutils/stdatomic.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>

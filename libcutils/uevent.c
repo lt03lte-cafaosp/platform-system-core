@@ -26,6 +26,18 @@
 
 #include <linux/netlink.h>
 
+#ifdef LINUX_ENABLED
+
+struct ucred
+{
+  pid_t pid;                    /* PID of sending process.  */
+  uid_t uid;                    /* UID of sending process.  */
+  gid_t gid;                    /* GID of sending process.  */
+};
+#define SCM_CREDENTIALS 0x02
+
+#endif  /* LINUX_ENABLED */
+
 /**
  * Like recv(), but checks that messages actually originate from the kernel.
  */
