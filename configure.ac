@@ -57,7 +57,10 @@ fi
 
 AM_CONDITIONAL([HOST_OS_LINUX], [test "x$HOST_OS" = "xlinux"])
 
-AC_SUBST(staging_incdir,${STAGING_INCDIR})
+AC_ARG_WITH(sanitized-headers,
+      AS_HELP_STRING([--with-sanitized-headers=DIR],
+         [Specify the location of the sanitized Linux headers]),
+      [CPPFLAGS="$CPPFLAGS -idirafter $withval"])
 
 AC_ARG_WITH([glib],
       AC_HELP_STRING([--with-glib],
@@ -85,6 +88,8 @@ AC_CONFIG_FILES([ \
     base/libbase.pc \
     logwrapper/Makefile \
     logwrapper/logwrapper.pc \
+    libsync/Makefile \
+    libsync/libsync.pc \
     fs_mgr/Makefile \
     fs_mgr/fs_mgr.pc \
     logcat/Makefile \
@@ -94,4 +99,3 @@ AC_CONFIG_FILES([ \
     include/Makefile
 ])
 AC_OUTPUT
-

@@ -16,7 +16,7 @@ logwrapper_LDADD   := liblogwrap.la
 logwrapper_LDADD   += -lcutils -llog
 
 # Export headers
-logwrapper_includedir=$(includedir)\logwrapper
+logwrapper_includedir=$(includedir)/logwrapper
 logwrapper_include_HEADERS := $(top_srcdir)/logwrapper/include/logwrap/logwrap.h
 
 pkgconfigdir := $(libdir)/pkgconfig
