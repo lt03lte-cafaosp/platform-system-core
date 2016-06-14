@@ -157,11 +157,16 @@ static bool reboot_service_impl(int fd, const char* arg) {
         return false;
     }
 
+// Call android_reboot instead of passing args to init.
+#if ADB_REBOOT_ENABLED
+    ret = android_reboot(ANDROID_RB_RESTART2, 0, arg);
+#else
     ret = property_set(ANDROID_RB_PROPERTY, property_val);
     if (ret < 0) {
         WriteFdFmt(fd, "reboot failed: %d\n", ret);
         return false;
     }
+#endif
 
     return true;
 }
