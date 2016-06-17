@@ -26,7 +26,7 @@
 
 #include <linux/netlink.h>
 
-#ifdef LINUX_ENABLED
+#if defined(LINUX_ENABLED) && !defined(_GNU_SOURCE)
 
 struct ucred
 {
