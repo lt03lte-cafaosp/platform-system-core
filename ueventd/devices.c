@@ -355,7 +355,7 @@ static void handle_mtp_plug_in_out(int in_out)
             printf("could not create child process to execute mtp server module\n");
         }
     } else if (in_out == 0 && mtp_pid > 0) {
-        kill(mtp_pid, SIGTERM);
+        kill(mtp_pid, SIGKILL);
         waitpid(mtp_pid, NULL, 0);
         mtp_pid = 0;
     }
