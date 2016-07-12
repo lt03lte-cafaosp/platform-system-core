@@ -50,6 +50,7 @@ libcutils_la_SOURCES  := $(common_sources)
 libcutils_la_CPPFLAGS := -DHAVE_PTHREADS
 libcutils_la_CPPFLAGS += -DLINUX_ENABLED
 libcutils_la_CPPFLAGS += -D__linux__
+libcutils_la_CPPFLAGS += -D_GNU_SOURCE
 libcutils_la_LDFLAGS  := -lpthread -llog
 
 if BUILD_HOST
