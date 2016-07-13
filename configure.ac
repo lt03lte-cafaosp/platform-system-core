@@ -87,5 +87,10 @@
           libzipfile/Makefile \
           fastboot/Makefile \
           adb/Makefile \
-          usb/Makefile
+	  usb/Makefile \
+	  libsync/Makefile \
+	  libsync/libsync.pc \
+	  include/Makefile \
+	  libutils/Makefile \
+	  libutils/libutils.pc
   ])

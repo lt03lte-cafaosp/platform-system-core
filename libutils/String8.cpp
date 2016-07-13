@@ -19,7 +19,7 @@
 
 #include <utils/String8.h>
 
-#include <utils/Log.h>
+#include <log/log.h>
 #include <utils/Unicode.h>
 #include <utils/SharedBuffer.h>
 #include <utils/String16.h>
@@ -39,6 +39,7 @@ namespace android {
 // Separator used by resource paths. This is not platform dependent contrary
 // to OS_PATH_SEPARATOR.
 #define RES_PATH_SEPARATOR '/'
+#define OS_PATH_SEPARATOR '/'
 
 static SharedBuffer* gEmptyStringBuf = NULL;
 static char* gEmptyString = NULL;

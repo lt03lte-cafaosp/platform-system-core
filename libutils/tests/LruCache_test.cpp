@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <utils/JenkinsHash.h>
 #include <utils/LruCache.h>
-#include <cutils/log.h>
+#include <log/log.h>
 #include <gtest/gtest.h>
 
 namespace {

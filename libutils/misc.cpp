@@ -20,7 +20,7 @@
 // Miscellaneous utility functions.
 //
 #include <utils/misc.h>
-#include <utils/Log.h>
+#include <log/log.h>
 
 #include <sys/stat.h>
 #include <string.h>

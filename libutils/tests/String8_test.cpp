@@ -15,7 +15,7 @@
  */
 
 #define LOG_TAG "String8_test"
-#include <utils/Log.h>
+#include <log/log.h>
 #include <utils/String8.h>
 
 #include <gtest/gtest.h>

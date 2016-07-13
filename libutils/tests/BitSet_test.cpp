@@ -17,7 +17,7 @@
 #define LOG_TAG "BitSet_test"
 
 #include <utils/BitSet.h>
-#include <cutils/log.h>
+#include <log/log.h>
 #include <gtest/gtest.h>
 #include <unistd.h>
 

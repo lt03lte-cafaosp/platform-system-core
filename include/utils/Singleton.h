@@ -26,7 +26,11 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 template <typename TYPE>
+#ifdef _ANDROID_
 class ANDROID_API Singleton
+#else
+class Singleton
+#endif
 {
 public:
     static TYPE& getInstance() {

@@ -15,7 +15,7 @@
  */
 
 #define LOG_TAG "Unicode_test"
-#include <utils/Log.h>
+#include <log/log.h>
 #include <utils/Unicode.h>
 
 #include <gtest/gtest.h>

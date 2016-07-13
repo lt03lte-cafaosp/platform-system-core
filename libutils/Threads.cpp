@@ -40,7 +40,7 @@
 #endif
 
 #include <utils/threads.h>
-#include <utils/Log.h>
+#include <log/log.h>
 
 #include <cutils/sched_policy.h>
 

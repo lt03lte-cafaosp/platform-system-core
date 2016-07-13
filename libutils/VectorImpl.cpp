@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <cutils/log.h>
+#include <log/log.h>
 #include <safe_iop.h>
 
 #include <utils/Errors.h>

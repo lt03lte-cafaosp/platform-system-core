@@ -17,7 +17,7 @@
 #define LOG_TAG "BasicHashtable_test"
 
 #include <utils/BasicHashtable.h>
-#include <cutils/log.h>
+#include <log/log.h>
 #include <gtest/gtest.h>
 #include <unistd.h>
 

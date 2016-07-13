@@ -19,8 +19,7 @@
 
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
-
-typedef struct native_handle native_handle_t;
+#include <cutils/native_handle.h>
 
 namespace android {
 
