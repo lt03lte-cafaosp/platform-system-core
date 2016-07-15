@@ -61,6 +61,10 @@ case "$1" in
 			ln -fs /sbin/usb/compositions/9091 \
 				/sbin/usb/boot_hsusb_composition
 			;;
+			*8916* )
+                        ln -fs /sbin/usb/compositions/9091 \
+                                /sbin/usb/boot_hsusb_composition
+                        ;;
 			*9640* )
 			echo 16384 > /sys/module/g_android/parameters/rndis_dl_max_xfer_size
 			;;
