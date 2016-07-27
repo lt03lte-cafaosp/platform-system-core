@@ -64,6 +64,7 @@ case "$1" in
                 echo "85 800000:90" > /sys/devices/system/cpu/cpufreq/interactive/target_loads
                 echo 40000 > /sys/devices/system/cpu/cpufreq/interactive/min_sample_time
                 echo 300000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+                echo cpufreq > /sys/devices/soc:qcom,ahb-clk-src/devfreq/soc:qcom,ahb-clk-src/governor
                 echo mem > /sys/power/autosleep
 
                 # Disable lpms
