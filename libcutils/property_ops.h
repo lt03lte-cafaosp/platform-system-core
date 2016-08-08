@@ -55,8 +55,16 @@ extern const char *path;
 #define PRI_DEBUG " D"
 #define PRI_VERB " V"
 
-#define ALOG(pri, tag, fmt, arg...) syslog (LOG_WARNING, fmt, ##arg)
-#define LOG_DEBUG(fmt, arg...) ALOG(PRI_VERB, LOG_TAG, fmt, ##arg)
+#undef LOG_DEBUG
+//#define LOG_DEBUG
+
+#undef LOG
+#ifdef LOG_DEBUG
+  #define LOG(fmt, args...) \
+	    ALOGD("%s:%d " fmt "\n", __func__, __LINE__, ##args)
+#else
+  #define LOG(fmt, args...) do {} while(0)
+#endif
 
 typedef enum {
         LOAD_FROM_PERSIST = 1,
