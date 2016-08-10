@@ -47,7 +47,7 @@ property_db* __list_matches_prop_name(const char* search_name)
 {
     if(__list_is_empty())
     {
-        LOG_DEBUG("List is empty, return \n");
+        LOG("List is empty, return \n");
         return NULL;
     }
     property_db *ln = glisthead;
@@ -55,7 +55,7 @@ property_db* __list_matches_prop_name(const char* search_name)
     {
         if (!strncmp(ln->unit.property_name, search_name, strlen(search_name)))
         {
-            LOG_DEBUG("[%s] => search val=%s, curr val =%s\n", __func__,
+            LOG("[%s] => search val=%s, curr val =%s\n", __func__,
                     search_name,ln->unit.property_name);
             return ln;
         }
@@ -85,16 +85,16 @@ bool __update_prop_value(const char* search_name, const char* property_value)
     ln = __list_matches_prop_name(search_name);
     if(ln != NULL)
     {
-        LOG_DEBUG("List Matches property Updating Value\n");
+        LOG("List Matches property Updating Value\n");
         memset(ln->unit.property_value, 0, sizeof(ln->unit.property_value));
         strncpy(ln->unit.property_value,  property_value,
             strlen(property_value));
-        LOG_DEBUG("Value copied to the db prop name %s", search_name);
+        LOG("Value copied to the db prop name %s", search_name);
         retval =0;
     } else {
-        LOG_DEBUG("New value not in the list, create a new node\n");
+        LOG("New value not in the list, create a new node\n");
         retval = __create_list_and_add(search_name, property_value);
-        LOG_DEBUG("Node Created Status =%d for prop name %s\n", retval,
+        LOG("Node Created Status =%d for prop name %s\n", retval,
             search_name);
     }
     
@@ -107,10 +107,10 @@ bool __list_add(property_db* list)
     property_db *ln;
     if (__list_is_empty())
     {
-        LOG_DEBUG("Adding first Node\n");
+        LOG("Adding first Node\n");
         glisthead = list;//assumed ln comes with NULL terminated next
     } else {
-        LOG_DEBUG("First Node Present, add subsequent one\n");
+        LOG("First Node Present, add subsequent one\n");
         //check if already the property exists
         if (NULL == __list_matches_prop_name(list->unit.property_name))
         {
@@ -127,7 +127,7 @@ bool __remove_node_from_list(unsigned char* property_name)
 
     if (__list_is_empty())
     {
-        LOG_DEBUG("List is Empty\n");
+        LOG("List is Empty\n");
         retval = false;
     } else {
         property_db *ln_prev, *ln = glisthead;
@@ -139,12 +139,12 @@ bool __remove_node_from_list(unsigned char* property_name)
                     //first node matches.
                     glisthead = ln->next;
                     free(ln);
-                    LOG_DEBUG("First Node Matched and head moved\n");
+                    LOG("First Node Matched and head moved\n");
                     retval = true;
                     break;
                 } else {
                     //remove the element here
-                    LOG_DEBUG("Removing Property Entry for @prop name =%s\n",
+                    LOG("Removing Property Entry for @prop name =%s\n",
                         ln->unit.property_name);
                     ln_prev->next = ln->next;
                     free(ln);
@@ -166,7 +166,7 @@ bool __free_list()
     property_db *ln = glisthead;
     if (__list_is_empty())
     {
-        LOG_DEBUG("List is Empty\n");
+        LOG("List is Empty\n");
         retval = false;
     } else {
         while(ln != NULL)
@@ -189,12 +189,12 @@ void __dump_nodes()
     property_db *ln = glisthead;
     if (__list_is_empty())
     {
-        LOG_DEBUG("List is Empty\n");
+        LOG("List is Empty\n");
         return;
     }
     for (; ln != NULL; ln = ln->next)
     {
-        LOG_DEBUG("%s,%s,%s\n", ln->unit.property_name,
+        LOG("%s,%s,%s\n", ln->unit.property_name,
                 ln->unit.property_value, ln->unit.callback_to_be_invoked);
     }
 }

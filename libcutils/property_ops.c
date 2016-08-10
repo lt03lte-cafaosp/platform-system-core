@@ -35,17 +35,6 @@
 #include <malloc.h>
 #include "property_ops.h"
 
-#undef LOG_DEBUG
-//#define LOG_DEBUG
-
-#undef LOG
-#ifdef LOG_DEBUG
-  #define LOG(fmt, args...) \
-	    ALOGD("%s:%d " fmt "\n", __func__, __LINE__, ##args)
-#else
-  #define LOG(fmt, args...) do {} while(0)
-#endif
-
 FILE *fp = NULL;
 const char *path = "/build.prop";
 char line[MAX_ALLOWED_LINE_LEN];
