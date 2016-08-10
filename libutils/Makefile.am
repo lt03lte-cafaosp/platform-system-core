@@ -6,7 +6,7 @@ common_sources += LinearTransform.cpp
 common_sources += Log.cpp
 common_sources += NativeHandle.cpp
 common_sources += Printer.cpp
-common_sources += ProcessCallStack.cpp
+#common_sources += ProcessCallStack.cpp
 common_sources += PropertyMap.cpp
 common_sources += RefBase.cpp
 common_sources += SharedBuffer.cpp
@@ -32,6 +32,7 @@ libutils_la_CPPFLAGS += -DHAVE_PTHREADS
 libutils_la_CPPFLAGS += -DLINUX_ENABLED
 libutils_la_CPPFLAGS += -D__linux__
 libutils_la_CPPFLAGS += -DANDROID_SMP=0
+libutils_la_CPPFLAGS += -DDEBUG_REFS_CALLSTACK_ENABLED=0
 libutils_la_CPPFLAGS += -std=c++11 -std=gnu++0x -std=c++0x -std=gnu++11
 
 requiredlibs = -lpthread
@@ -65,7 +66,7 @@ utilsinc_HEADERS += $(top_srcdir)/include/utils/misc.h
 utilsinc_HEADERS += $(top_srcdir)/include/utils/Mutex.h
 utilsinc_HEADERS += $(top_srcdir)/include/utils/NativeHandle.h
 utilsinc_HEADERS += $(top_srcdir)/include/utils/Printer.h
-utilsinc_HEADERS += $(top_srcdir)/include/utils/ProcessCallStack.h
+#utilsinc_HEADERS += $(top_srcdir)/include/utils/ProcessCallStack.h
 utilsinc_HEADERS += $(top_srcdir)/include/utils/PropertyMap.h
 utilsinc_HEADERS += $(top_srcdir)/include/utils/RefBase.h
 utilsinc_HEADERS += $(top_srcdir)/include/utils/RWLock.h

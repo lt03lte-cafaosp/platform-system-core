@@ -43,8 +43,10 @@
 // needs to be called explicitly
 #define DEBUG_REFS_ENABLED_BY_DEFAULT   0
 
+#ifndef DEBUG_REFS_CALLSTACK_ENABLED
 // whether callstack are collected (significantly slows things down)
 #define DEBUG_REFS_CALLSTACK_ENABLED    1
+#endif
 
 // folder where stack traces are saved when DEBUG_REFS is enabled
 // this folder needs to exist and be writable
@@ -134,7 +136,9 @@ public:
         }
         if (dumpStack) {
             ALOGE("above errors at:");
+#if DEBUG_REFS_CALLSTACK_ENABLED
             CallStack stack(LOG_TAG);
+#endif
         }
     }
 
@@ -269,8 +273,9 @@ private:
                 ALOGD("\t%c ID %p (ref %d):", inc, ref->id, ref->ref);
                 ref = ref->next;
             }
-
+#if DEBUG_REFS_CALLSTACK_ENABLED
             CallStack stack(LOG_TAG);
+#endif
         }
     }
 
