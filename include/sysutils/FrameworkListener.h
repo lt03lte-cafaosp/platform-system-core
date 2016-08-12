@@ -26,6 +26,7 @@ public:
     static const int CMD_ARGS_MAX = 16;
 private:
     FrameworkCommandCollection *mCommands;
+    bool mSkipToNextNullByte;
 
 public:
     FrameworkListener(const char *socketName);
