@@ -27,6 +27,10 @@
 FrameworkListener::FrameworkListener(const char *socketName) :
                             SocketListener(socketName, true) {
     mCommands = new FrameworkCommandCollection();
+    errorRate = 0;
+    mCommandCount = 0;
+    mWithSeq = withSeq;
+    mSkipToNextNullByte = false;
 }
 
 bool FrameworkListener::onDataAvailable(SocketClient *c) {
@@ -36,8 +40,15 @@ bool FrameworkListener::onDataAvailable(SocketClient *c) {
     if ((len = read(c->getSocket(), buffer, sizeof(buffer) -1)) < 0) {
         SLOGE("read() failed (%s)", strerror(errno));
         return false;
-    } else if (!len)
+    } else if (!len) {
         return false;
+    } else if (buffer[len-1] != '\0') {
+        SLOGW("String is not zero-terminated");
+        android_errorWriteLog(0x534e4554, "29831647");
+        c->sendMsg(500, "Command too large for buffer", false);
+        mSkipToNextNullByte = true;
+        return false;
+    }
 
     int offset = 0;
     int i;
@@ -48,6 +59,17 @@ bool FrameworkListener::onDataAvailable(SocketClient *c) {
             offset = i + 1;
         }
     }
+            /* IMPORTANT: dispatchCommand() expects a zero-terminated string */
+            if (mSkipToNextNullByte) {
+                mSkipToNextNullByte = false;
+            } else {
+                dispatchCommand(c, buffer + offset);
+            }
+            offset = i + 1;
+        }
+    }
+
+    mSkipToNextNullByte = false;
     return true;
 }
 
