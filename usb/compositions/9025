@@ -169,6 +169,9 @@ case `source /sbin/usb/target` in
 	*8909* )
 		echo "This composition can't be supported on 8909"
 		;;
+        *8096* )
+                run_9x35 &
+                ;;
 	*9640* )
 		run_9x35 &
 		;;

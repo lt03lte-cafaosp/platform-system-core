@@ -72,7 +72,10 @@ case `source /sbin/usb/target` in
 	*9640* )
 		run_9x35 &
 		;;
-	* )
+        *8096* )
+                run_9x35 &
+                ;;
+        * )
 		run_9x35 &
 		;;
 esac

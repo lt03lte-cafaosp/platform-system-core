@@ -26,7 +26,7 @@
 
 TARGET_DIR=/target # default directory
 if [ ! -f $TARGET_DIR ]; then
-	TARGET_DIR=/sys/devices/soc0/build_id
+	TARGET_DIR=/sys/devices/soc0/machine
 fi
 
 case `cat ${TARGET_DIR}` in
