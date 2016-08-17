@@ -16,8 +16,7 @@ bin_PROGRAMS = fs_mgr
 
 fs_mgr_SOURCES := fs_mgr_main.c
 fs_mgr_CFLAGS  := -I$(top_srcdir)/fs_mgr/include
-fs_mgr_LDADD   := libfs_mgr.la
-fs_mgr_LDFLAGS := -lcutils -llog -lext4_utils -lmincrypt
+fs_mgr_LDADD   := libfs_mgr.la -lcutils -llog -lext4_utils -lmincrypt
 
 # Export headers
 fs_mgr_includedir=$(includedir)\fs_mgr
