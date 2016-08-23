@@ -77,6 +77,16 @@
 #define AID_SDCARD_ALL    1035  /* access all users external storage */
 #define AID_LOGD          1036  /* log daemon */
 #define AID_SHARED_RELRO  1037  /* creator of shared GNU RELRO files */
+#define AID_DBUS          1038  /* dbus-daemon IPC broker process */
+#define AID_TLSDATE       1039  /* tlsdate unprivileged user */
+#define AID_MEDIA_EX      1040  /* mediaextractor process */
+#define AID_AUDIOSERVER   1041  /* audioserver process */
+#define AID_METRICS_COLL  1042  /* metrics_collector process */
+#define AID_METRICSD      1043  /* metricsd process */
+#define AID_WEBSERV       1044  /* webservd process */
+#define AID_DEBUGGERD     1045  /* debuggerd unprivileged user */
+#define AID_MEDIA_CODEC   1046  /* mediacodec process */
+#define AID_CAMERASERVER  1047  /* cameraserver process */
 
 #define AID_SHELL         2000  /* adb and debug shell user */
 #define AID_CACHE         2001  /* cache access */
