@@ -22,7 +22,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/inotify.h>
-#include <sys/limits.h>
 #include <sys/poll.h>
 #include <linux/input.h>
 #include <errno.h>

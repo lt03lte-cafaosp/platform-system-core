@@ -148,8 +148,10 @@ static int do_action(const char* arg)
         maybe_abort();
     } else if (!strcmp(arg, "assert")) {
         __assert("some_file.c", 123, "false");
+#ifndef LE_UM
     } else if (!strcmp(arg, "assert2")) {
-        __assert2("some_file.c", 123, "some_function", "false");
+       __assert2("some_file.c", 123, "some_function", "false");
+#endif
     } else if (!strcmp(arg, "LOG_ALWAYS_FATAL")) {
         LOG_ALWAYS_FATAL("hello %s", "world");
     } else if (!strcmp(arg, "LOG_ALWAYS_FATAL_IF")) {

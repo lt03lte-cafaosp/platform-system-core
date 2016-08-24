@@ -19,9 +19,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/ptrace.h>
-
+#include <linux/ptrace.h>
 #include <backtrace/Backtrace.h>
-
 #include "machine.h"
 #include "utility.h"
 

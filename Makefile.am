@@ -18,6 +18,7 @@ endif
 BUILD_COMPONENTS += libbacktrace
 BUILD_COMPONENTS += usb
 BUILD_COMPONENTS += include
+BUILD_COMPONENTS += debuggerd
 endif
 
 if BUILD_HOST
