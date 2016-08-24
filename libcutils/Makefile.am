@@ -33,8 +33,10 @@ target_sources += debugger.c
 target_sources += klog.c
 target_sources += partition_utils.c
 target_sources += properties.c
+if LE_PROPERTIES
 target_sources += ll.c
 target_sources += property_ops.c
+endif
 target_sources += qtaguid.c
 target_sources += trace-dev.c
 target_sources += uevent.c
@@ -53,6 +55,9 @@ libcutils_la_CPPFLAGS := -DHAVE_PTHREADS
 libcutils_la_CPPFLAGS += -DLINUX_ENABLED
 libcutils_la_CPPFLAGS += -D__linux__
 libcutils_la_CPPFLAGS += -D_GNU_SOURCE
+if LE_PROPERTIES
+libcutils_la_CPPFLAGS += -DLE_PROPERTIES
+endif
 libcutils_la_LDFLAGS  := -lpthread -llog
 
 if BUILD_HOST

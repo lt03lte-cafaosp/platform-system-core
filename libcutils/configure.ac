@@ -63,6 +63,8 @@ fi
 
 AM_CONDITIONAL([HOST_OS_LINUX], [test "x$HOST_OS" = "xlinux"])
 
+AM_CONDITIONAL(LE_PROPERTIES, [test "x$LE_PROPERTIES_ENABLED" = "xtrue"])
+
 AC_CONFIG_FILES([ \
     Makefile \
     libcutils.pc
