@@ -21,6 +21,8 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
+
 #include <sys/prctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>

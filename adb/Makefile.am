@@ -32,7 +32,7 @@ libadbd_la_CPPFLAGS += -I$(top_srcdir)/base/include
 libadbd_la_CPPFLAGS += -I$(top_srcdir)/fs_mgr/include
 libadbd_la_CPPFLAGS += -Wall -Wno-unused-parameter
 libadbd_la_CPPFLAGS += -Wno-deprecated-declarations
-libadbd_la_CPPFLAGS += -std=c++11 -fpermissive
+libadbd_la_CPPFLAGS += -std=c++14 -fpermissive
 libadbd_la_CPPFLAGS += -DUSE_GLIB -Dstrlcat=g_strlcat @GLIB_CFLAGS@
 libadbd_la_CPPFLAGS += -DADB_HOST=0
 libadbd_la_CPPFLAGS += -DADB_REVISION='"$(adb_version)"'
@@ -58,7 +58,7 @@ adbd_CPPFLAGS += -I$(top_srcdir)/base/include
 adbd_CPPFLAGS += -I$(top_srcdir)/fs_mgr/include
 adbd_CPPFLAGS += -Wall -Wno-unused-parameter
 adbd_CPPFLAGS += -Wno-deprecated-declarations
-adbd_CPPFLAGS += -std=c++11 -fpermissive
+adbd_CPPFLAGS += -std=c++14 -fpermissive
 adbd_CPPFLAGS += -D_GNU_SOURCE
 adbd_CPPFLAGS += -DADB_HOST=0
 adbd_CPPFLAGS += -DADB_REVISION='"$(adb_version)"'
@@ -86,7 +86,7 @@ libadb_la_SOURCES += adb_auth_host.cpp
 libadbd_la_CPPFLAGS := -I$(top_srcdir)/include
 libadbd_la_CPPFLAGS += -I$(top_srcdir)/base/include
 libadbd_la_CPPFLAGS += -Wall -Wno-unused-parameter
-libadbd_la_CPPFLAGS += -std=c++11 -fpermissive
+libadbd_la_CPPFLAGS += -std=c++14 -fpermissive
 libadbd_la_CPPFLAGS += -DADB_HOST
 libadbd_la_CPPFLAGS += -DADB_REVISION='"$(adb_version)"'
 libadbd_la_LDFLAGS   = -lbase

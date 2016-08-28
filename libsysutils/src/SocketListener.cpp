@@ -15,6 +15,7 @@
  */
 #include <stdio.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/select.h>

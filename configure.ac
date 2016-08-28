@@ -92,7 +92,9 @@ AC_CONFIG_FILES([ \
     libsync/libsync.pc \
     fs_mgr/Makefile \
     fs_mgr/fs_mgr.pc \
+    libsysutils/Makefile \
     logcat/Makefile \
+    logd/Makefile \
     adb/Makefile \
     fastboot/Makefile \
     usb/Makefile \

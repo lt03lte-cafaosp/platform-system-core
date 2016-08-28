@@ -9,7 +9,7 @@ lib_LTLIBRARIES := libbase.la
 libbase_la_SOURCES  := $(libbase_sources)
 libbase_la_CPPFLAGS := -I$(top_srcdir)/include
 libbase_la_CPPFLAGS += -I$(top_srcdir)/base/include
-libbase_la_CPPFLAGS += -std=c++11
+libbase_la_CPPFLAGS += -std=c++14
 libbase_la_LDFLAGS  := -lcutils
 
 # Export headers

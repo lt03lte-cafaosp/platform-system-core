@@ -17,10 +17,14 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
+#include <limits.h>
 #include <string.h>
+#include <stdint.h>
+
 #include <sys/user.h>
 #include <time.h>
 #include <unistd.h>
+#include <syscall.h>
 
 #include <unordered_map>
 
@@ -35,6 +39,10 @@
 #define log_buffer_size(id) mMaxSize[id]
 #define LOG_BUFFER_MIN_SIZE (64 * 1024UL)
 #define LOG_BUFFER_MAX_SIZE (256 * 1024 * 1024UL)
+
+#ifndef PAGE_SIZE
+# define PAGE_SIZE 4096
+#endif
 
 static bool valid_size(unsigned long value) {
     if ((value < LOG_BUFFER_MIN_SIZE) || (LOG_BUFFER_MAX_SIZE < value)) {
@@ -146,7 +154,8 @@ int LogBuffer::log(log_id_t log_id, log_time realtime,
     int prio = ANDROID_LOG_INFO;
     const char *tag = NULL;
     if (log_id == LOG_ID_EVENTS) {
-        tag = android::tagToName(elem->getTag());
+        //tag = android::tagToName(elem->getTag());
+        tag = "EVENTS";
     } else {
         prio = *msg;
         tag = msg + 1;
@@ -268,9 +277,9 @@ class LogBufferElementKey {
             uint16_t pid;
             uint16_t tid;
             uint16_t padding;
-        } __packed;
+        };
         uint64_t value;
-    } __packed;
+    };
 
 public:
     LogBufferElementKey(uid_t u, pid_t p, pid_t t):uid(u),pid(p),tid(t),padding(0) { }

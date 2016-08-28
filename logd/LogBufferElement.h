@@ -17,7 +17,7 @@
 #ifndef _LOGD_LOG_BUFFER_ELEMENT_H__
 #define _LOGD_LOG_BUFFER_ELEMENT_H__
 
-#include <stdatomic.h>
+#include <cutils/atomic.h>
 #include <stdlib.h>
 #include <sys/types.h>
 
@@ -92,7 +92,9 @@ public:
     }
     unsigned short getMsgLen() const { return mMsg ? mMsgLen : 0; }
     uint64_t getSequence(void) const { return mSequence; }
-    static uint64_t getCurrentSequence(void) { return sequence.load(memory_order_relaxed); }
+    static uint64_t getCurrentSequence(void) {
+        return atomic_load_explicit(&sequence, memory_order_relaxed);
+    }
     log_time getRealTime(void) const { return mRealTime; }
 
     uint32_t getTag(void) const;

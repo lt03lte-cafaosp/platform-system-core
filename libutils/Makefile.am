@@ -33,7 +33,7 @@ libutils_la_CPPFLAGS += -DLINUX_ENABLED
 libutils_la_CPPFLAGS += -D__linux__
 libutils_la_CPPFLAGS += -DANDROID_SMP=0
 libutils_la_CPPFLAGS += -DDEBUG_REFS_CALLSTACK_ENABLED=0
-libutils_la_CPPFLAGS += -std=c++11 -std=gnu++0x -std=c++0x -std=gnu++11
+libutils_la_CPPFLAGS += -std=c++14 -std=gnu++14 -fpermissive
 
 requiredlibs = -lpthread
 

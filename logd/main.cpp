@@ -17,6 +17,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <grp.h>
 #include <poll.h>
 #include <sched.h>
 #include <semaphore.h>
@@ -25,16 +26,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/capability.h>
-#include <sys/klog.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/un.h>
 #include <syslog.h>
 #include <unistd.h>
 
 #include <memory>
 
+#include <cutils/klog.h>
 #include <cutils/properties.h>
 #include <cutils/sched_policy.h>
 #include <cutils/sockets.h>
@@ -320,6 +322,112 @@ static void readDmesg(LogAudit *al, LogKlog *kl) {
     }
 }
 
+struct socketinfo {
+    const char *name;
+    const char *type;
+    uid_t uid;
+    gid_t gid;
+    int perm;
+};
+
+static unsigned int android_name_to_id(const char *name)
+{
+    const struct android_id_info *info = android_ids;
+    unsigned int n;
+
+    for (n = 0; n < android_id_count; n++) {
+        if (!strcmp(info[n].name, name))
+            return info[n].aid;
+    }
+
+    return -1U;
+}
+
+int create_socket(const char *name, int type, mode_t perm, uid_t uid,gid_t gid)
+{
+    struct sockaddr_un addr;
+    int fd, ret;
+
+    fd = socket(PF_UNIX, type, 0);
+    if (fd < 0) {
+        fprintf(stderr,"Failed to open socket '%s': %s\n", name, strerror(errno));
+        return -1;
+    }
+
+    memset(&addr, 0 , sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    snprintf(addr.sun_path, sizeof(addr.sun_path), ANDROID_SOCKET_DIR"/%s",
+             name);
+
+    ret = unlink(addr.sun_path);
+    if (ret != 0 && errno != ENOENT) {
+        fprintf(stderr,"Failed to unlink old socket '%s': %s\n", name, strerror(errno));
+        goto out_close;
+    }
+
+    ret = bind(fd, (struct sockaddr *) &addr, sizeof (addr));
+    if (ret) {
+        fprintf(stderr,"Failed to bind socket '%s': %s\n", name, strerror(errno));
+        goto out_unlink;
+    }
+
+    chown(addr.sun_path, uid, gid);
+    chmod(addr.sun_path, perm);
+
+    return fd;
+
+out_unlink:
+    unlink(addr.sun_path);
+out_close:
+    close(fd);
+    return -1;
+}
+
+unsigned int decode_uid(const char *s)
+{
+    unsigned int v;
+
+    if (!s || *s == '\0')
+        return -1U;
+    if (isalpha(s[0]))
+        return android_name_to_id(s);
+
+    errno = 0;
+    v = (unsigned int) strtoul(s, 0, 0);
+    if (errno)
+        return -1U;
+    return v;
+}
+
+void create_logd_sockets()
+{
+    const char* logd_sockets [3][5]= {
+       // name  ,  type      ,  perm ,  uid  , gid
+       { "logd" , "stream"   , "0666", "logd", "logd"},
+       { "logdr", "seqpacket", "0666", "logd", "logd"},
+       { "logdw", "dgram"    , "0222", "logd", "logd"}
+    };
+
+    for(int i = 0; i < 3; i++) {
+
+        socketinfo* si = (socketinfo*) calloc(1, sizeof(*si));
+        si->name = logd_sockets[i][0];
+        si->type = logd_sockets[i][1];
+        si->perm = strtoul(logd_sockets[i][2], 0, 8);
+        si->uid = decode_uid(logd_sockets[i][3]);
+        si->gid = decode_uid(logd_sockets[i][4]);
+
+        int socket_type = (
+            !strcmp(si->type, "stream") ? SOCK_STREAM :
+            (!strcmp(si->type, "dgram") ? SOCK_DGRAM : SOCK_SEQPACKET));
+        int s = create_socket(si->name, socket_type,
+                              si->perm, si->uid, si->gid);
+        if (s >= 0) {
+            fcntl(s, F_SETFD, 0);
+        }
+    }
+}
+
 // Foreground waits for exit of the main persistent threads
 // that are started here. The threads are created to manage
 // UNIX domain client sockets for writing, reading and
@@ -327,6 +435,10 @@ static void readDmesg(LogAudit *al, LogKlog *kl) {
 // logging plugins like auditd and restart control. Additional
 // transitory per-client threads are created for each reader.
 int main(int argc, char *argv[]) {
+
+    //create /dev/socket/logd* sockets.
+    create_logd_sockets();
+
     int fdPmesg = -1;
     bool klogd = property_get_bool_svelte("logd.klogd");
     if (klogd) {
@@ -391,9 +503,9 @@ int main(int argc, char *argv[]) {
         pthread_attr_destroy(&attr);
     }
 
-    if (drop_privs() != 0) {
-        return -1;
-    }
+    //if (drop_privs() != 0) {
+    //    return -1;
+    //}
 
     // Serves the purpose of managing the last logs times read on a
     // socket connection, and as a reader lock on a range of log

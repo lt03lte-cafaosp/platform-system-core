@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 
 #include <unordered_map>
@@ -41,7 +42,7 @@ public:
 
     std::unique_ptr<const TEntry *[]> sort(size_t n) {
         if (!n) {
-            std::unique_ptr<const TEntry *[]> sorted(NULL);
+            std::unique_ptr<const TEntry *[]> sorted(nullptr);
             return sorted;
         }
 

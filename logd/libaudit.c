@@ -25,6 +25,7 @@
 #define LOG_TAG "libaudit"
 #include <log/log.h>
 
+#include "utils/Compat.h"
 #include "libaudit.h"
 
 /**
