@@ -38,6 +38,11 @@
 
 #define DEFAULT_MAX_ROTATED_LOGS 4
 
+#define __noreturn __attribute__((noreturn))
+
+#define	__printflike(_a,_b) \
+	__attribute__ ((__format__ (__printf__, _a, _b)))
+
 static AndroidLogFormat * g_logformat;
 
 /* logd prefixes records with a length field */
@@ -362,6 +367,12 @@ static bool getSizeTArg(char *ptr, size_t *val, size_t min = 0,
     *val = ret;
     return true;
 }
+
+#if defined(__GLIBC__)
+static const char* getprogname() {
+  return program_invocation_short_name;
+}
+#endif
 
 static void logcat_panic(bool showHelp, const char *fmt, ...)
 {

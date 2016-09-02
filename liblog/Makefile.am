@@ -1,12 +1,16 @@
-common_sources := logd_write_syslog.c
-common_sources += log_event_write.c
-common_sources += event_tag_map.c
+host_sources   := log_event_write.c event_tag_map.c
+host_sources   += fake_log_device.c logd_write_kern.c
 
-host_sources   := $(common_sources) fake_log_device.c event.logtags
-target_sources := $(common_sources) log_time.cpp
+target_sources := log_event_write.c event_tag_map.c log_time.cpp
+if USE_LOGD
+target_sources += logd_write.c
+target_sources += log_read.c
+else
+target_sources += logd_write_syslog.c
+target_sources += log_read_kern.c
+endif
 target_sources += log_is_loggable.c
 target_sources += logprint.c
-target_sources += log_read_kern.c
 
 requiredlibs = -lpthread
 
