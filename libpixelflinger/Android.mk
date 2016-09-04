@@ -59,6 +59,8 @@ LOCAL_SHARED_LIBRARIES := libcutils liblog
 LOCAL_MODULE:= libpixelflinger
 LOCAL_SRC_FILES := $(PIXELFLINGER_SRC_FILES)
 LOCAL_CFLAGS := $(PIXELFLINGER_CFLAGS)
+LOCAL_C_INCLUDES += external/safe-iop/include
+LOCAL_SHARED_LIBRARIES := libcutils liblog libutils
 
 ifneq ($(BUILD_TINY_ANDROID),true)
 # Really this should go away entirely or at least not depend on
