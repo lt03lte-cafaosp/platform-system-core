@@ -43,7 +43,7 @@ bool firstboot = true;
 
 bool set_property_value(const char* prop_name, unsigned char *prop_val)
 {
-  if(firstboot){
+   if(firstboot){
      create_node_from_persist(path);
      firstboot = false;
    }
@@ -56,19 +56,13 @@ bool get_property_value(const char* prop_name, unsigned char *prop_val)
      create_node_from_persist(path);
      firstboot = false;
    }
-    property_db *retval = __list_matches_prop_name(prop_name);
-    if(NULL != retval)
-    {
-        LOG("Property exist =%s value = %s\n",
-            retval->unit.property_name, retval->unit.property_value);
-        snprintf(prop_val,MAX_ALLOWED_LINE_LEN,"%s",
-                    retval->unit.property_value);
-        prop_val[strlen(retval->unit.property_value)] = '\0';
-        return true;
-    } else {
-        LOG("Property doesnt exist\n");
-        return false;
-    }
+
+   bool retval = __retrive_prop_value(prop_name, prop_val);
+
+   if(false == retval)
+      ALOGW("Property: %s doesnt exist\n", prop_name);
+
+   return retval;
 }
 
 bool __check_for_a_property(const char* prop_name)
@@ -77,8 +71,6 @@ bool __check_for_a_property(const char* prop_name)
     LOG("Property exist =%s \n", (retval==NULL)? "false": "true");
     return (retval==NULL)? false: true;
 }
-
-
 
 bool save_ds_to_persist(void)
 {
@@ -96,12 +88,8 @@ bool save_ds_to_persist(void)
         {
             memset(stringtowrite, 0 , MAX_ALLOWED_LINE_LEN);
 
-            /*snprintf(stringtowrite, MAX_ALLOWED_LINE_LEN, "%s,%s,%s\n",
-                    ln->unit.property_name,ln->unit.property_value,
-                    ln->unit.callback_to_be_invoked );
-           */
-             snprintf(stringtowrite, MAX_ALLOWED_LINE_LEN, "%s=%s",
-                    ln->unit.property_name,ln->unit.property_value );
+            snprintf(stringtowrite, MAX_ALLOWED_LINE_LEN, "%s=%s",
+                ln->unit.property_name,ln->unit.property_value );
 
             LOG("Writing to persist %s \n", stringtowrite);
 
@@ -116,7 +104,7 @@ bool save_ds_to_persist(void)
             }
         }
     } else {
-        LOG("File Doesnt Exist\n");
+        ALOGE("File: %s doesnt exist\n", path);
         retval = false;
     }
 
@@ -142,7 +130,7 @@ void dump_current_ds(void)
     __dump_nodes();
 }
 
-void __dump_persist(void)
+void dump_persist(void)
 {
     //TO BE IMPLEMENTED
 }
@@ -152,7 +140,7 @@ property_db* __pull_one_line_data(const char* line)
     int curr_length = 0;
     const char *curr_line_ptr = line;
     char *delimiter = NULL;
-    int iterator =0;
+    int iterator = 0;
 
     //TODO : We can do this using strtok - will be short code
     property_db *extracted_val = (property_db*)calloc(1, sizeof(property_db)
@@ -162,44 +150,38 @@ property_db* __pull_one_line_data(const char* line)
         return extracted_val;
     }
     extracted_val->next = NULL; //null added here no need to add in ll.c
+    delimiter = strchr(curr_line_ptr, '=');
 
     for(iterator=0 ; iterator< MAX_PROPERTY_ITER; iterator++)
     {
-        LOG("+++++++++++++++++++++++++++++\n");
-        delimiter = strchr(curr_line_ptr, '=');
-        LOG("[%s] => line pulled =%s", __func__,curr_line_ptr);
-        /*if(delimiter == NULL)
-        {
-            LOG("[%s] => Delimiter = NULL, search for newline\n");
-            if(strchr(curr_line_ptr, '\n') == NULL)
-            {
-                LOG("%s, Unknown Delimiter on line\n ", __func__);
-            } else {
-                LOG("%s, 3rd string =%s\n",__func__, curr_line_ptr);
-            }
-            return extracted_val;
-        }*/
-        //position of the delimiter "," in our case would be length to copy
-        curr_length = delimiter - curr_line_ptr;
-        if (curr_length > MAX_ALLOWED_LINE_LEN || curr_length < 0)
-        {
-            curr_length = MAX_ALLOWED_LINE_LEN;
-        }
+        LOG("[%s] => line pulled: %s", __func__,curr_line_ptr);
+
         if(extracted_val != NULL)
         {
             switch (iterator)
             {
                 case EXT_NAME:
+                    curr_length = delimiter - curr_line_ptr;
+                    if (curr_length > PROP_NAME_MAX || curr_length < 0)
+                    {
+                       curr_length = PROP_NAME_MAX;
+                    }
                     strncpy(extracted_val->unit.property_name,
                             curr_line_ptr, curr_length);
-                    LOG("[%s] => Extracted Name =%s\n", __func__,
+                    LOG("[%s] => Extracted Name: %s\n", __func__,
                             extracted_val->unit.property_name);
                     break;
 
                 case EXT_VAL:
+                    curr_line_ptr = delimiter+1; //+1 for the delimiter itself
+                    curr_length = strlen(curr_line_ptr);
+                    if (curr_length > PROP_VALUE_MAX || curr_length < 0)
+                    {
+                       curr_length = PROP_VALUE_MAX;
+                    }
                     strncpy(extracted_val->unit.property_value,
                             curr_line_ptr, curr_length);
-                    LOG("[%s] => Extracted Value =%s\n", __func__
+                    LOG("[%s] => Extracted Value: %s\n", __func__
                             ,extracted_val->unit.property_value);
                     break;
 
@@ -208,10 +190,8 @@ property_db* __pull_one_line_data(const char* line)
             }
         }
 
-        LOG("[%s] => iterator=%d, curr_line_ptr=%s, delimiter =%s\n", __func__,
+        LOG("[%s] => iterator: %d, curr_line_ptr: %s, delimiter: %s\n", __func__,
                 iterator,curr_line_ptr, delimiter);
-        LOG("*****************************\n");
-        curr_line_ptr = delimiter+1; //+1 for the delimiter itself
     }
     return extracted_val;
 }

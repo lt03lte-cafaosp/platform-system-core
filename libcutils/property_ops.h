@@ -30,24 +30,24 @@
  *****************************************************************************/
 
 
-#ifndef BT_PROP_OPS_H
-#define BT_PROP_OPS_H
+#ifndef LE_PROP_OPS_H
+#define LE_PROP_OPS_H
 
 #include <stdbool.h>
+#include <log/log.h>
+
+#include "sys/system_properties.h"
+
 /***********************************************************************
 **  Type definitions
 ***********************************************************************/
-#define MAX_ALLOWED_LINE_LEN                (80)
-#define MAX_PROPERTY_ITER                   (2)
-#define MAX_NUM_PROPERTIES                  (10)
-
-#define MAX_NAME_LEN                        (80)
-#define MAX_VALUE_LEN                       (80)
+#define MAX_ALLOWED_LINE_LEN        (PROP_NAME_MAX+PROP_VALUE_MAX+1)
+#define MAX_PROPERTY_ITER           (2)
+#define MAX_NUM_PROPERTIES          (10)
 
 extern const char *path;
 
-#define LOG_TAG "bt_property"
-#include <syslog.h>
+#define LOG_TAG "le_property"
 
 #define PRI_INFO " I"
 #define PRI_WARN " W"
@@ -79,8 +79,8 @@ typedef enum {
 
 
 typedef struct property_unit{
-    unsigned char property_name[MAX_NAME_LEN];     // name of property
-    unsigned char property_value[MAX_VALUE_LEN];   // string val of property
+    unsigned char property_name[PROP_NAME_MAX];     // name of property
+    unsigned char property_value[PROP_VALUE_MAX];   // string val of property
     bool callback_to_be_invoked;                  // should the cb be invoked
 } property_unit;
 
@@ -176,12 +176,12 @@ property_db* __pull_one_line_data(const char*);
 bool __check_for_a_property(const char*);
 
 /**
- * Internal :UNUSED for the moment - used to dump all the persist properties
+ * UNUSED for the moment - used to dump all the persist properties
  * @param Filename as path
  * @return True on success and false otherwise
  */
-void __dump_persist(void);
+void dump_persist(void);
 
 #define UNUSED(x) (void)(x)
 
-#endif /* BT_PROP_OPS_H */
+#endif /* LE_PROP_OPS_H */

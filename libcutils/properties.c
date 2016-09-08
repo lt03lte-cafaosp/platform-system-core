@@ -37,7 +37,21 @@ int property_get(const char *key, char *value, const char *default_value) {
 int property_set(const char *key, const char *value)
 {
 #ifdef LE_PROPERTIES
-    set_property_value(key,value);
+    char prop_name[PROP_NAME_MAX];
+    char prop_value[PROP_VALUE_MAX];
+
+    if (key == 0) return -1;
+    if (value == 0) value = "";
+    if (strlen(key) >= PROP_NAME_MAX) return -1;
+    if (strlen(value) >= PROP_VALUE_MAX) return -1;
+
+    memset(prop_name, 0, sizeof prop_name);
+    memset(prop_value, 0, sizeof prop_value);
+
+    strlcpy(prop_name, key, sizeof prop_name);
+    strlcpy(prop_value, value, sizeof prop_value);
+
+    set_property_value(prop_name, prop_value);
 #endif
     return 0;
 }
@@ -71,7 +85,7 @@ int8_t property_get_bool(const char *key, int8_t default_value) {
 
 }
 
-#if 0
-int64_t property_get_int64(const char *key, int64_t default_value);
-int32_t property_get_int32(const char *key, int32_t default_value);
-#endif
+void dump_properties(void) {
+    dump_persist();
+}
+

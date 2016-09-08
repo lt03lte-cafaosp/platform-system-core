@@ -29,10 +29,8 @@
  *
  *****************************************************************************/
 
-
-#ifndef BT_PROP_LL_H
-#define BT_PROP_LL_H
-
+#ifndef LE_PROP_LL_H
+#define LE_PROP_LL_H
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -71,6 +69,14 @@ bool __create_list_and_add( const char* search_name, const char* property_value)
 bool __update_prop_value(const char* search_name, const char* property_value);
 
 /**
+ * Retrive the value of the property with specifed name
+ * @param char* string for search property name
+ * @param char* string for fetching the property value
+ * @return True for success and False otherwise
+ */
+bool __retrive_prop_value(const char* search_name, const char* property_value);
+
+/**
  * Add the element into the list
  * @param Node pointer for the list node
  * @return True for success and False otherwise
@@ -105,4 +111,4 @@ property_db* __get_list_head();
  */
 void __dump_nodes();
 
-#endif //#define BT_PROP_LL_H
+#endif //#define LE_PROP_LL_H

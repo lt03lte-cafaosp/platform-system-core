@@ -77,10 +77,16 @@ bool __create_list_and_add( const char* search_name, const char* property_value)
     return __list_add(ln);
 }
 
-bool __update_prop_value(const char* search_name, const char* property_value)
+bool __update_prop_value(const char* search_name, const char* value)
 {
     property_db *ln = NULL;
     int retval = -1;
+    char property_value[PROP_VALUE_MAX];
+
+    // add  trailing new line to property value
+    memset(property_value, 0, sizeof property_value);
+    strlcpy(property_value, value, sizeof property_value);
+    property_value[strlen(property_value)] = '\n';
 
     ln = __list_matches_prop_name(search_name);
     if(ln != NULL)
@@ -100,6 +106,29 @@ bool __update_prop_value(const char* search_name, const char* property_value)
     
     save_ds_to_persist();
     return ((retval==0)? true:false);
+}
+
+bool __retrive_prop_value(const char* search_name, const char* value)
+{
+    property_db *ln = NULL;
+    char property_value[PROP_VALUE_MAX];
+
+    memset(property_value, 0, sizeof property_value);
+
+    ln = __list_matches_prop_name(search_name);
+    if(NULL != ln)
+    {
+        LOG("Property: %s exist with value: %s\n",
+            ln->unit.property_name, ln->unit.property_value);
+
+        strlcpy(property_value, ln->unit.property_value,
+                sizeof property_value);
+
+        // Don't copy trailing new line added in update_prop_value
+        strncpy(value, property_value, strlen(property_value)-1);
+        return true;
+    }
+    return false;
 }
 
 bool __list_add(property_db* list)
