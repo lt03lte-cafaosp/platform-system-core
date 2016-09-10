@@ -93,6 +93,7 @@
 #define AID_TRUNKS        1049  /* trunksd process (TPM daemon) */
 #define AID_NVRAM         1050  /* Access-controlled NVRAM */
 /* Changes to this file must be made in AOSP, *not* in internal branches. */
+#define AID_REBOOTERS     1301
 
 #define AID_SHELL         2000  /* adb and debug shell user */
 #define AID_CACHE         2001  /* cache access */
@@ -204,6 +205,7 @@ static const struct android_id_info android_ids[] = {
     { "firewall",      AID_FIREWALL, },
     { "trunks",        AID_TRUNKS, },
     { "nvram",         AID_NVRAM, },
+    { "rebooters",     AID_REBOOTERS, },
 
     { "shell",         AID_SHELL, },
     { "cache",         AID_CACHE, },
