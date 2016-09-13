@@ -10,9 +10,11 @@ BUILD_COMPONENTS += logwrapper
 BUILD_COMPONENTS += libsync
 BUILD_COMPONENTS += fs_mgr
 BUILD_COMPONENTS += adb
+if USE_LOGD
 BUILD_COMPONENTS += logcat
 BUILD_COMPONENTS += libsysutils
 BUILD_COMPONENTS += logd
+endif
 BUILD_COMPONENTS += usb
 BUILD_COMPONENTS += include
 endif

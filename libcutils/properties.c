@@ -86,6 +86,8 @@ int8_t property_get_bool(const char *key, int8_t default_value) {
 }
 
 void dump_properties(void) {
+#ifdef LE_PROPERTIES
     dump_persist();
+#endif
 }
 
