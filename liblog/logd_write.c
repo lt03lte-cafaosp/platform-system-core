@@ -45,6 +45,17 @@
 #include <private/android_filesystem_config.h>
 #include <private/android_logger.h>
 
+// For gettid.
+#if defined(__linux__) && !defined(__ANDROID__)
+#include <syscall.h>
+#include <unistd.h>
+
+// No definition needed for Android because we'll just pick up bionic's copy.
+pid_t gettid() {
+  return syscall(__NR_gettid);
+}
+#endif  // __ANDROID__
+
 #define LOG_BUF_SIZE 1024
 
 #if FAKE_LOG_DEVICE
