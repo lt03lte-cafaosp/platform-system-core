@@ -28,6 +28,7 @@
 
 ADB_MUTEX_DEFINE( socket_list_lock );
 
+static void local_socket_close_locked(asocket *s);
 
 int sendfailmsg(int fd, const char *reason)
 {
@@ -119,7 +120,7 @@ void close_all_sockets(atransport *t)
 restart:
     for(s = local_socket_list.next; s != &local_socket_list; s = s->next){
         if(s->transport == t || (s->peer && s->peer->transport == t)) {
-            s->close(s);
+            local_socket_close_locked(s);
             goto restart;
         }
     }
@@ -190,7 +191,7 @@ static void local_socket_ready(asocket *s)
 static void local_socket_close(asocket *s)
 {
     adb_mutex_lock(&socket_list_lock);
-    s->close(s);
+    local_socket_close_locked(s);
     adb_mutex_unlock(&socket_list_lock);
 }
 
@@ -232,7 +233,7 @@ static void local_socket_close_locked(asocket *s)
         s->peer->peer = 0;
         // tweak to avoid deadlock
         if (s->peer->close == local_socket_close) {
-            s->close(s->peer);
+            local_socket_close_locked(s->peer);
         } else {
             s->peer->close(s->peer);
         }
