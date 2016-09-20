@@ -104,6 +104,8 @@ AC_CONFIG_FILES([ \
     adb/Makefile \
     fastboot/Makefile \
     usb/Makefile \
-    include/Makefile
+    include/Makefile \
+    libbacktrace/Makefile \
+    libbacktrace/libbacktrace.pc
 ])
 AC_OUTPUT
