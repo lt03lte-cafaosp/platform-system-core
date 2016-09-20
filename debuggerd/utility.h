@@ -22,6 +22,7 @@
 #include <sys/types.h>
 
 #include <backtrace/Backtrace.h>
+#include "cutils/memory.h"
 
 // Figure out the abi based on defined macros.
 #if defined(__arm__)
@@ -40,6 +41,10 @@
 #error "Unsupported ABI"
 #endif
 
+struct user_vfp {
+          unsigned long long fpregs[32];
+          unsigned long fpscr;
+  };
 
 struct log_t{
     /* tombstone file descriptor */
@@ -56,7 +61,6 @@ struct log_t{
     log_t()
         : tfd(-1), amfd(-1), crashed_tid(-1), current_tid(-1), should_retrieve_logcat(true) {}
 };
-
 // List of types of logs to simplify the logging decision in _LOG
 enum logtype {
   ERROR,

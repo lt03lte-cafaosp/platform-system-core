@@ -106,6 +106,7 @@ AC_CONFIG_FILES([ \
     usb/Makefile \
     include/Makefile \
     libbacktrace/Makefile \
-    libbacktrace/libbacktrace.pc
+    libbacktrace/libbacktrace.pc \
+    debuggerd/Makefile
 ])
 AC_OUTPUT

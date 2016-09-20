@@ -21,6 +21,41 @@
 #include <stdbool.h>
 #include <sys/types.h>
 
+#if !defined(__BIONIC__)
+// In order to compile parts of debuggerd for the host, we need to
+// define these values.
+#if !defined(NSIGILL)
+#define NSIGILL ILL_BADSTK
+#endif
+#if !defined(BUS_MCEERR_AR)
+#define BUS_MCEERR_AR 4
+#endif
+#if !defined(BUS_MCEERR_AO)
+#define BUS_MCEERR_AO 5
+#endif
+#if !defined(NSIGBUS)
+#define NSIGBUS BUS_MCEERR_AO
+#endif
+#if !defined(NSIGFPE)
+#define NSIGFPE FPE_FLTSUB
+#endif
+#if !defined(NSIGSEGV)
+#define NSIGSEGV SEGV_ACCERR
+#endif
+#if !defined(TRAP_BRANCH)
+#define TRAP_BRANCH 3
+#endif
+#if !defined(TRAP_HWBKPT)
+#define TRAP_HWBKPT 4
+#endif
+#if !defined(NSIGTRAP)
+#define NSIGTRAP TRAP_HWBKPT
+#endif
+#if !defined(SI_DETHREAD)
+#define SI_DETHREAD (-7)
+#endif
+#endif
+
 /* Creates a tombstone file and writes the crash dump to it.
  * Returns the path of the tombstone, which must be freed using free(). */
 char* engrave_tombstone(pid_t pid, pid_t tid, int signal, int original_si_code,

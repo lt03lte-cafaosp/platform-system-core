@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-#include <elf.h>
+#include <linux/elf.h>
 #include <errno.h>
 #include <stdint.h>
 #include <string.h>
 #include <sys/ptrace.h>
+#include <linux/ptrace.h>
 #include <sys/uio.h>
 
 #include <backtrace/Backtrace.h>
