@@ -49,7 +49,56 @@ case "$1" in
 
 		# Enable Low Power modes
 		echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
+
+
+		#Enable FTRACE_ENABLE on MDM9607
+		echo "++++ $0 -> ENABLE-FTRACE" > /dev/kmsg
+		# bail out if its perf config
+		if [ ! -d /sys/module/msm_rtb ]
+		then
+		    return
+		fi
+		# bail out if coresight isn't present
+		if [ ! -d /sys/bus/coresight ]
+		then
+		    return
+		fi
+		# bail out if ftrace events aren't present
+		if [ ! -d /sys/kernel/debug/tracing/events ]
+		then
+		    return
+		fi
+
+
+		#coresight
+		echo 1 > /sys/bus/coresight/devices/coresight-stm/enable
+		echo 1 > /sys/kernel/debug/tracing/tracing_on
+		echo 0 > /sys/kernel/debug/tracing/events/enable
+		echo 1 > /sys/bus/coresight/devices/coresight-tmc-etf/curr_sink
+		echo mem > /sys/bus/coresight/devices/coresight-tmc-etr/out_mode
+		echo 1 > /sys/bus/coresight/devices/coresight-tmc-etr/curr_sink
+		#Workqueue
+		echo 1 > /sys/kernel/debug/tracing/events/workqueue/enable
+		echo 1 > /sys/kernel/debug/tracing/events/workqueue/filter
+		echo 1 > /sys/kernel/debug/tracing/events/workqueue/workqueue_activate_work/enable
+		echo 1 > /sys/kernel/debug/tracing/events/workqueue/workqueue_execute_end/enable
+		echo 1 > /sys/kernel/debug/tracing/events/workqueue/workqueue_execute_start/enable
+		echo 1 > /sys/kernel/debug/tracing/events/workqueue/workqueue_queue_work/enable
+		#SoftIRQs
+		echo 1 > /sys/kernel/debug/tracing/events/irq/enable
+		echo 1 > /sys/kernel/debug/tracing/events/irq/filter
+		echo 1 > /sys/kernel/debug/tracing/events/irq/softirq_entry/enable
+		echo 1 > /sys/kernel/debug/tracing/events/irq/softirq_exit/enable
+		echo 1 > /sys/kernel/debug/tracing/events/irq/softirq_raise/enable
+		#IRQs
+		echo 1 > /sys/kernel/debug/tracing/events/irq/enable
+		echo 1 > /sys/kernel/debug/tracing/events/irq/irq_handler_entry/enable
+		echo 1 > /sys/kernel/debug/tracing/events/irq/irq_handler_exit/enable
+
+		echo "++++ $0 -> END" > /dev/kmsg
+		#FTRACE ENABLE END
 		;;
+
 	esac
 
         case "$soc_id" in
