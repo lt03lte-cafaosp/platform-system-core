@@ -116,6 +116,9 @@ case `source /sbin/usb/target` in
 	*8909* )
 		run_9607 &
 		;;
+        *8916* )
+                run_9607 &
+                ;;
 	*9640* )
 		run_9x35 &
 		;;
