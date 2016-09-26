@@ -125,7 +125,7 @@ bool __retrive_prop_value(const char* search_name, const char* value)
                 sizeof property_value);
 
         // Don't copy trailing new line added in update_prop_value
-        strncpy(value, property_value, strlen(property_value)-1);
+        strlcpy(value, property_value, strlen(property_value));
         return true;
     }
     return false;
