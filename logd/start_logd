@@ -39,6 +39,7 @@ case "$1" in
             mkdir /dev/socket
             chmod 777 /dev/socket
         fi
+        echo 600 > /proc/sys/net/unix/max_dgram_qlen
         start-stop-daemon -S -b -a /sbin/logd
         echo "done"
         ;;
