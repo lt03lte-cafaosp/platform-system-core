@@ -35,9 +35,9 @@ case "$1" in
   start)
         ;;
   stop)
-      if [[ `cat /etc/reboot-cookie` = 1 ]]; then
+      if [[ `cat /data/reboot-cookie` = 1 ]]; then
           sys_reboot bootloader
-      elif [[ `cat /etc/reboot-cookie` = 2 ]]; then
+      elif [[ `cat /data/reboot-cookie` = 2 ]]; then
           sys_reboot recovery
       else
           sys_reboot
