@@ -31,8 +31,6 @@
 #include <sys/stat.h>
 #include <sys/poll.h>
 
-#include <selinux/android.h>
-
 #include <log/logger.h>
 
 #include <cutils/sockets.h>
@@ -241,22 +239,7 @@ static bool selinux_action_allowed(int s, pid_t tid, debugger_action_t action)
   }
 
   perm = debuggerd_perms[action];
-
-  if (getpeercon(s, &scon) < 0) {
-    ALOGE("Cannot get peer context from socket\n");
-    goto out;
-  }
-
-  if (getpidcon(tid, &tcon) < 0) {
-    ALOGE("Cannot get context for tid %d\n", tid);
-    goto out;
-  }
-
-  allowed = (selinux_check_access(scon, tcon, tclass, perm, NULL) == 0);
-
 out:
-   freecon(scon);
-   freecon(tcon);
    return allowed;
 }
 
@@ -667,11 +650,8 @@ static void usage() {
 }
 
 int main(int argc, char** argv) {
-  union selinux_callback cb;
   if (argc == 1) {
-    selinux_enabled = is_selinux_enabled();
-    cb.func_log = selinux_log_callback;
-    selinux_set_callback(SELINUX_CB_LOG, cb);
+    selinux_enabled = -1;
     return do_server();
   }
 

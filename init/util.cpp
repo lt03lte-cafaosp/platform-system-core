@@ -25,7 +25,6 @@
 #include <ftw.h>
 
 #include <selinux/label.h>
-#include <selinux/android.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
