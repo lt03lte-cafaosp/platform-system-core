@@ -53,10 +53,10 @@ property_db* __list_matches_prop_name(const char* search_name)
     property_db *ln = glisthead;
     for (; ln !=NULL; ln  = ln ->next)
     {
-        if (!strncmp(ln->unit.property_name, search_name, strlen(search_name)))
+        LOG("[%s] => search val=%s, curr val =%s\n", __func__,
+                search_name,ln->unit.property_name);
+        if (strcmp(ln->unit.property_name, search_name) == 0)
         {
-            LOG("[%s] => search val=%s, curr val =%s\n", __func__,
-                    search_name,ln->unit.property_name);
             return ln;
         }
     }

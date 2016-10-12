@@ -60,7 +60,7 @@ bool get_property_value(const char* prop_name, unsigned char *prop_val)
    bool retval = __retrive_prop_value(prop_name, prop_val);
 
    if(false == retval)
-      ALOGW("Property: %s doesnt exist\n", prop_name);
+      LOG("Property: %s doesnt exist\n", prop_name);
 
    return retval;
 }
