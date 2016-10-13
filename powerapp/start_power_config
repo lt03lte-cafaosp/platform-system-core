@@ -46,6 +46,7 @@ case "$1" in
 		echo "1 800000:86" > /sys/devices/system/cpu/cpufreq/interactive/target_loads
 		echo 40000 > /sys/devices/system/cpu/cpufreq/interactive/min_sample_time
 		echo 400000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+		echo mem > /sys/power/autosleep
 
 		# Enable Low Power modes
 		echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
