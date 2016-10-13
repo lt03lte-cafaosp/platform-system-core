@@ -1,4 +1,4 @@
-#!/system/bin/sh
+#! /bin/sh
 # Copyright (c) 2009-2011, 2016 The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-if  [ "$1" == "mdm9635" ]
-then
-    target="mdm9635"
-elif [ -f /sys/devices/soc0/machine ]; then
-    target=`cat /sys/devices/soc0/machine | tr [A-Z] [a-z]`
-else
-    target=`getprop ro.product.device`
-fi
+set -e
 
 configure_memory_parameters () {
     # Set Memory paremeters.
@@ -71,7 +64,6 @@ configure_memory_parameters () {
     # Normalized ADJ for HOME is 6. Hence multiply by 6
     # ADJ score represented as INT in LMK params, actual score can be in decimal
     # Hence add 6 considering a worst case of 0.9 conversion to INT (0.9*6).
-
     set_almk_ppr_adj=$(((set_almk_ppr_adj * 6) + 6))
     echo $set_almk_ppr_adj > /sys/module/lowmemorykiller/parameters/adj_max_shift
     echo $set_almk_ppr_adj > /sys/module/process_reclaim/parameters/min_score_adj
@@ -104,13 +96,17 @@ configure_memory_parameters () {
         echo 53059 > /sys/module/lowmemorykiller/parameters/vmpressure_file_min
         adjZeroMinFree=15360
     fi
-
     clearPercent=$((((adjZeroMinFree * 100) / MemTotalPg) + 1))
     echo $clearPercent > /sys/module/zcache/parameters/clear_percent
     echo 30 >  /sys/module/zcache/parameters/max_pool_percent
 
     # Zram disk - 512MB size
     zram_enable=`getprop ro.config.zram`
+    if [ "$zram_enable" == "true" ] && [ -f /dev/block/zram0 ]; then
+        echo 536870912 > /sys/block/zram0/disksize
+        mkswap /dev/block/zram0
+        swapon /dev/block/zram0 -p 32758
+    fi
 
     SWAP_ENABLE_THRESHOLD=1048576
     swap_enable=`getprop ro.config.swap`
@@ -136,136 +132,18 @@ configure_memory_parameters () {
     fi
 }
 
-case "$target" in
-    "mdm9635" )
-    echo 1 > /sys/bus/coresight/devices/coresight-modem-etm0/enable
-    echo 1 > /sys/bus/coresight/devices/coresight-tmc-etr/curr_sink
-esac
-
-case "$target" in
-    "msm7201a_ffa" | "msm7201a_surf" | "msm7627_ffa" | "msm7627_surf" | "msm7627a" | \
-    "qsd8250_surf" | "qsd8250_ffa" | "msm7630_surf" | "msm7630_1x" | "msm7630_fusion" | "qsd8650a_st1x")
-        echo "ondemand" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        echo 90 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/up_threshold
-        chown -h system /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate
-        ;;
-esac
-
-case "$target" in
-    "msm7201a_ffa" | "msm7201a_surf")
-        echo 500000 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate
-        ;;
-esac
-
-case "$target" in
-    "msm7630_surf" | "msm7630_1x" | "msm7630_fusion")
-        echo 75000 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate
-        echo 1 > /sys/module/pm2/parameters/idle_sleep_mode
-        ;;
-esac
-
-case "$target" in
-     "msm7201a_ffa" | "msm7201a_surf" | "msm7627_ffa" | "msm7627_surf" | "msm7630_surf" | "msm7630_1x" | "msm7630_fusion" | "msm7627a" )
-        echo 245760 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-        ;;
-esac
-
-case "$target" in
-    "msm8660_surf" | "msm8660_csfb")
-	 echo 1 > /sys/module/rpm_resources/enable_low_power/L2_cache
-	 echo 1 > /sys/module/rpm_resources/enable_low_power/pxo
-	 echo 2 > /sys/module/rpm_resources/enable_low_power/vdd_dig
-	 echo 2 > /sys/module/rpm_resources/enable_low_power/vdd_mem
-	 echo 1 > /sys/module/rpm_resources/enable_low_power/rpm_cpu
-	 echo 1 > /sys/module/pm_8x60/modes/cpu0/power_collapse/suspend_enabled
-	 echo 1 > /sys/module/pm_8x60/modes/cpu1/power_collapse/suspend_enabled
-	 echo 1 > /sys/module/pm_8x60/modes/cpu0/standalone_power_collapse/suspend_enabled
-	 echo 1 > /sys/module/pm_8x60/modes/cpu1/standalone_power_collapse/suspend_enabled
-	 echo 1 > /sys/module/pm_8x60/modes/cpu0/power_collapse/idle_enabled
-	 echo 1 > /sys/module/pm_8x60/modes/cpu1/power_collapse/idle_enabled
-	 echo 1 > /sys/module/pm_8x60/modes/cpu0/standalone_power_collapse/idle_enabled
-	 echo 1 > /sys/module/pm_8x60/modes/cpu1/standalone_power_collapse/idle_enabled
-	 echo "ondemand" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	 echo "ondemand" > /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
-	 echo 50000 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate
-	 echo 50000 > /sys/devices/system/cpu/cpu1/cpufreq/ondemand/sampling_rate
-	 echo 90 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/up_threshold
-	 echo 90 > /sys/devices/system/cpu/cpu1/cpufreq/ondemand/up_threshold
-	 echo 1 > /sys/devices/system/cpu/cpufreq/ondemand/io_is_busy
-	 echo 4 > /sys/devices/system/cpu/cpufreq/ondemand/sampling_down_factor
-	 chown -h system /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate
-	 chown -h system /sys/devices/system/cpu/cpu1/cpufreq/ondemand/sampling_rate
-	 echo 384000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-	 echo 384000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
-	 chown -h system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-	 chown -h system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-	 chown -h system /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
-	 chown -h system /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
-	 chown -h root.system /sys/devices/system/cpu/mfreq
-	 chmod -h 220 /sys/devices/system/cpu/mfreq
-	 chown -h root.system /sys/devices/system/cpu/cpu1/online
-	 chmod -h 664 /sys/devices/system/cpu/cpu1/online
-        ;;
-esac
-
-case "$target" in
-    "msm8960")
-     echo 1 > /sys/module/rpm_resources/enable_low_power/L2_cache
-     echo 1 > /sys/module/rpm_resources/enable_low_power/pxo
-     echo 1 > /sys/module/pm_8x60/modes/cpu0/power_collapse/suspend_enabled
-     echo 1 > /sys/module/pm_8x60/modes/cpu1/power_collapse/suspend_enabled
-     echo 1 > /sys/module/pm_8x60/modes/cpu0/standalone_power_collapse/suspend_enabled
-     echo 1 > /sys/module/pm_8x60/modes/cpu1/standalone_power_collapse/suspend_enabled
-     echo 1 > /sys/module/pm_8x60/modes/cpu0/standalone_power_collapse/idle_enabled
-     echo 1 > /sys/module/pm_8x60/modes/cpu1/standalone_power_collapse/idle_enabled
-     echo "ondemand" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-     echo "ondemand" > /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
-     echo 50000 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate
-     echo 50000 > /sys/devices/system/cpu/cpu1/cpufreq/ondemand/sampling_rate
-     echo 90 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/up_threshold
-     echo 90 > /sys/devices/system/cpu/cpu1/cpufreq/ondemand/up_threshold
-     echo 1 > /sys/devices/system/cpu/cpufreq/ondemand/io_is_busy
-     echo 4 > /sys/devices/system/cpu/cpufreq/ondemand/sampling_down_factor
-     chown -h system /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate
-     chown -h system /sys/devices/system/cpu/cpu1/cpufreq/ondemand/sampling_rate
-     echo 384000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-     echo 384000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
-     chown -h system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-     chown -h system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-     chown -h system /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
-     chown -h system /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
-     chown -h root.system /sys/devices/system/cpu/mfreq
-     chmod -h 220 /sys/devices/system/cpu/mfreq
-     chown -h root.system /sys/devices/system/cpu/cpu1/online
-     chmod -h 664 /sys/devices/system/cpu/cpu1/online
-        ;;
-esac
-
-case "$target" in
-    "msm7627_ffa" | "msm7627_surf" | "msm7627a")
-        echo 25000 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate
-        ;;
-esac
-
-case "$target" in
-    "qsd8250_surf" | "qsd8250_ffa" | "qsd8650a_st1x")
-        echo 50000 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate
-        ;;
-esac
-
-case "$target" in
-    "qsd8650a_st1x")
-        mount -t debugfs none /sys/kernel/debug
-    ;;
-esac
-
-if [ "$target" != "mdm9635" ]
-then
-	emmc_boot=`getprop ro.emmc`
+case "$1" in
+start)
+echo -n "Starting init_qcom_post_boot: "
+if [ -f /sys/devices/soc0/machine ]; then
+    target=`cat /sys/devices/soc0/machine | tr [A-Z] [a-z]`
+else
+    target=`getprop ro.board.platform`
 fi
 
+emmc_boot=`getprop ro.boot.emmc`
 case "$emmc_boot"
-    in "1")
+    in "true")
         chown -h system /sys/devices/platform/rs300000a7.65536/force_sync
         chown -h system /sys/devices/platform/rs300000a7.65536/sync_sts
         chown -h system /sys/devices/platform/rs300100a7.65536/force_sync
@@ -273,19 +151,6 @@ case "$emmc_boot"
     ;;
 esac
 
-
-# Post-setup services
-case "$target" in
-    "msm8660_surf" | "msm8660_csfb" | "msm8960")
-        start mpdecision
-	;;
-esac
-
-case "$target" in
-    "msm8660_surf" | "msm8660_csfb")
-        start thermald
-    ;;
-esac
 case "$target" in
     "msm8953")
 
@@ -308,18 +173,6 @@ case "$target" in
         case "$soc_id" in
             "293" | "304" )
 
-                # Start Host based Touch processing
-                case "$hw_platform" in
-                     "MTP" | "Surf" | "RCM" )
-                        #if this directory is present, it means that a
-                        #1200p panel is connected to the device.
-                        dir="/sys/bus/i2c/devices/3-0038"
-                        #if [ ! -d "$dir" ]; then
-                        #      start hbtp
-                        #fi
-                        ;;
-                esac
-
                 #scheduler settings
                 echo 3 > /proc/sys/kernel/sched_window_stats_policy
                 echo 3 > /proc/sys/kernel/sched_ravg_hist_size
@@ -340,18 +193,22 @@ case "$target" in
                 # Apply inter-cluster load balancer restrictions
                 echo 1 > /proc/sys/kernel/sched_restrict_cluster_spill
 
-                for devfreq_gov in /sys/class/devfreq/soc:qcom,mincpubw/governor
+                for devfreq_gov in /sys/class/devfreq/soc:qcom,mincpubw*/governor
                 do
-                    echo "cpufreq" > $devfreq_gov
+                    if [ "cpufreq" != "$devfreq_gov" ];then
+                        echo "cpufreq" > $devfreq_gov
+                    fi
                 done
 
                 for devfreq_gov in /sys/class/devfreq/soc:qcom,cpubw/governor
                 do
-                    echo "bw_hwmon" > $devfreq_gov
+                    if [ "bw_hwmon" != "$devfreq_gov" ];then
+                        echo "bw_hwmon" > $devfreq_gov
+                    fi
                     for cpu_io_percent in /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/io_percent
                     do
                         echo 34 > $cpu_io_percent
-                   done
+                    done
                     for cpu_guard_band in /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/guard_band_mbps
                     do
                         echo 0 > $cpu_guard_band
@@ -369,7 +226,7 @@ case "$target" in
                         echo 1600 > $cpu_idle_mbps
                     done
                     for cpu_low_power_delay in /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/low_power_delay
-                   do
+                    do
                         echo 20 > $cpu_low_power_delay
                     done
                     for cpu_low_power_io_percent in /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/low_power_io_percent
@@ -377,7 +234,7 @@ case "$target" in
                         echo 34 > $cpu_low_power_io_percent
                     done
                     for cpu_mbps_zones in /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/mbps_zones
-                   do
+                    do
                         echo "1611 3221 5859 6445 7104" > $cpu_mbps_zones
                     done
                     for cpu_sample_ms in /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/sample_ms
@@ -430,6 +287,7 @@ case "$target" in
                 echo "85 1401600:80" > /sys/devices/system/cpu/cpufreq/interactive/target_loads
                 echo 39000 > /sys/devices/system/cpu/cpufreq/interactive/min_sample_time
                 echo 652800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+
                 # re-enable thermal & BCL core_control now
                 echo 1 > /sys/module/msm_thermal/core_control/enabled
                 # Bring up all cores online
@@ -459,5 +317,20 @@ case "$target" in
                 configure_memory_parameters
         ;;
         esac
+;;
+esac
+echo "init_qcom_post_boot completed"
+;;
+stop)
+    echo -n "Stopping init_qcom_post_boot: "
+    echo "done"
+;;
+restart)
+    $0 stop
+    $0 start
+;;
+*)
+    echo "Incorrect option specified"
+    exit 1
 ;;
 esac
