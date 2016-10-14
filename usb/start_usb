@@ -57,6 +57,10 @@ case "$1" in
 			echo 1 > /sys/devices/virtual/android_usb/android0/f_rndis_qc/max_pkt_per_xfer
 			echo 3 > /sys/module/dwc3/parameters/bulk_ep_xfer_timeout_ms
 			;;
+			*8096* )
+			ln -fs /sbin/usb/compositions/9039 \
+				/sbin/usb/boot_hsusb_composition
+			;;
 			*8909* )
 			ln -fs /sbin/usb/compositions/9091 \
 				/sbin/usb/boot_hsusb_composition
@@ -71,7 +75,7 @@ case "$1" in
 			*californium* )
 			echo 16384 > /sys/module/g_android/parameters/gsi_in_rndis_aggr_size
 			;;
-			*8053* | *8096* | *8017* )
+			*8053* | *8017* )
 			ln -fs /sbin/usb/compositions/901D \
                                 /sbin/usb/boot_hsusb_composition
                         ;;
