@@ -1,3 +1,6 @@
+#define LOG_TAG "SocketClient"
+#define LOG_NDEBUG 1
+
 #include <alloca.h>
 #include <errno.h>
 #include <malloc.h>
@@ -8,7 +11,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#define LOG_TAG "SocketClient"
 #include <cutils/log.h>
 
 #include <sysutils/SocketClient.h>
