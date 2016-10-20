@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define LOG_TAG "SocketListener"
+#define LOG_NDEBUG 1
+
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -23,7 +26,6 @@
 #include <sys/types.h>
 #include <sys/un.h>
 
-#define LOG_TAG "SocketListener"
 #include <cutils/log.h>
 #include <cutils/sockets.h>
 
