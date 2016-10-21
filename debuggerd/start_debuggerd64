@@ -40,11 +40,13 @@ case "$1" in
            chmod g+w /data/tombstones
         fi
         start-stop-daemon -S -b -a /usr/bin/debuggerd64
+        start-stop-daemon -S -b -a /usr/bin/debuggerd
         echo "done"
         ;;
    stop)
         echo -n "stopping debuggerd"
         start-stop-daemon -K -n debuggerd64
+        start-stop-daemon -K -n debuggerd
         echo "done"
         ;;
    restart)

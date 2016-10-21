@@ -38,7 +38,6 @@ crasher_LDFLAGS := -llog -lcutils -lc -lext4_utils
 endif
 
 if ARM64
-AM_CFLAGS += -DTARGET_IS_64_BIT
 debuggerd64_sources := arm64/machine.cpp
 crasher64_sources := arm64/crashglue.S
 

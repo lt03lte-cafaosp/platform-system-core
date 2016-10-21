@@ -624,7 +624,7 @@ static int do_server() {
     sockaddr addr;
     socklen_t alen = sizeof(addr);
 
-    ALOGV("waiting for connection\n");
+    ALOGV("waiting for connection at socket %s\n",SOCKET_NAME);
     int fd = accept(s, &addr, &alen);
     if (fd < 0) {
       ALOGV("accept failed: %s\n", strerror(errno));
