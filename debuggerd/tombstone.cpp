@@ -46,8 +46,6 @@
 #include <backtrace/Backtrace.h>
 #include <backtrace/BacktraceMap.h>
 
-#include <selinux/android.h>
-
 #include "backtrace.h"
 #include "elf_utils.h"
 #include "machine.h"
