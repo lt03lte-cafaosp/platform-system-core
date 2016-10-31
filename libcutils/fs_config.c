@@ -75,7 +75,7 @@ static inline uint64_t get8LE(const uint8_t* src)
 */
 
 static const struct fs_path_config android_dirs[] = {
-    { 00770, AID_SYSTEM, AID_CACHE,  0, "cache" },
+/*    { 00770, AID_SYSTEM, AID_CACHE,  0, "cache" },
     { 00771, AID_SYSTEM, AID_SYSTEM, 0, "data/app" },
     { 00771, AID_SYSTEM, AID_SYSTEM, 0, "data/app-private" },
     { 00771, AID_ROOT,   AID_ROOT,   0, "data/dalvik-cache" },
@@ -95,6 +95,12 @@ static const struct fs_path_config android_dirs[] = {
     { 00755, AID_ROOT,   AID_ROOT,   0, "system/etc/ppp" },
     { 00755, AID_ROOT,   AID_SHELL,  0, "vendor" },
     { 00777, AID_ROOT,   AID_ROOT,   0, "sdcard" },
+*/
+
+    { 00770, AID_WWWDATA,   AID_WWWDATA,   0, "system/WEBSERVER" },
+    { 00770, AID_WWWDATA,   AID_WWWDATA,   0, "system/www" },
+    { 01755, AID_ROOT,      AID_ROOT,      0, "system/tmp" },
+
     { 00755, AID_ROOT,   AID_ROOT,   0, 0 },
 };
 
@@ -108,6 +114,7 @@ static const char conf_dir[] = "/system/etc/fs_config_dirs";
 static const char conf_file[] = "/system/etc/fs_config_files";
 
 static const struct fs_path_config android_files[] = {
+#if 0
     { 00440, AID_ROOT,      AID_SHELL,     0, "system/etc/init.goldfish.rc" },
     { 00550, AID_ROOT,      AID_SHELL,     0, "system/etc/init.goldfish.sh" },
     { 00550, AID_ROOT,      AID_SHELL,     0, "system/etc/init.ril" },
@@ -135,7 +142,8 @@ static const struct fs_path_config android_files[] = {
 
     { 00750, AID_ROOT,      AID_ROOT,      0, "system/bin/uncrypt" },
     { 00750, AID_ROOT,      AID_ROOT,      0, "system/bin/install-recovery.sh" },
-    { 00755, AID_ROOT,      AID_SHELL,     0, "system/bin/*" },
+    /* { 00755, AID_ROOT,      AID_SHELL,     0, "system/bin/*" }, */
+
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/lib/valgrind/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/lib64/valgrind/*" },
     { 00755, AID_ROOT,      AID_SHELL,     0, "system/xbin/*" },
@@ -146,6 +154,93 @@ static const struct fs_path_config android_files[] = {
     { 00750, AID_ROOT,      AID_SHELL,     0, "init*" },
     { 00750, AID_ROOT,      AID_SHELL,     0, "sbin/fs_mgr" },
     { 00640, AID_ROOT,      AID_SHELL,     0, "fstab.*" },
+#endif
+    /* rootfs permissions */
+
+
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc0.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc1.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc2.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc3.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc4.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc5.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc6.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rcS.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/avahi/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/disconnect" },
+    { 00600, AID_ROOT,      AID_ROOT,      0, "system/etc/group-" },
+    { 00600, AID_ROOT,      AID_ROOT,      0, "system/etc/gshadow" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/init.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/mdev/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/network/if-down-up.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/network/if-post-down.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/network/if-pre-up.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/network/if-up.d/*" },
+    { 00600, AID_ROOT,      AID_ROOT,      0, "system/etc/passwd-" },
+    { 00600, AID_ROOT,      AID_ROOT,      0, "system/etc/ppp/chap-secrets" },
+    { 00600, AID_ROOT,      AID_ROOT,      0, "system/etc/ppp/pap-secrets" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/ppp/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/bluetooth/*" },
+    { 00600, AID_ROOT,      AID_ROOT,      0, "system/etc/securetty" },
+    { 00600, AID_ROOT,      AID_ROOT,      0, "system/etc/shadow" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/udhcpc.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/share/udhcpc/*" },
+    { 00644, AID_ROOT,      AID_ROOT,      0, "system/etc/*" },
+
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/bin/busybox" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/bin/su.shadow" },
+
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/sbin/halt.sysvinit" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/sbin/shutdown.sysvinit" },
+
+
+
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/chage" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/chfn.shadow" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/chsh.shadow" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/expiry" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/su" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/gpasswd" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/newgidmap" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/newgrp.shadow" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/newuidmap" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/passwd.shadow" },
+
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/lib/dbus/dbus-daemon-launch-helper" },
+
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/sbin/pppd" },
+
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/sbin/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/lib/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/libexec/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/kernel-tests/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/kernel-tests/*" },
+
+    { 00644, AID_ROOT,      AID_ROOT,      0, "system/usr/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/sbin/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/lib/*" },
+    { 00644, AID_ROOT,      AID_ROOT,      0, "system/*" },
+
+
+    /* /usr permissions */
+
+    /* suid binaries */
+    { 04755, AID_ROOT,      AID_ROOT,      0, "userdata/bin/chage" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "userdata/bin/chfn.shadow" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "userdata/bin/chsh.shadow" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "userdata/bin/newgrp.shadow" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "userdata/bin/su" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "userdata/sbin/pppd" },
+
+    { 00755, AID_ROOT,      AID_ROOT,      0, "userdata/bin/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "userdata/sbin/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "userdata/lib/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "userdata/kernel-tests/*" },
+    { 00644, AID_ROOT,      AID_ROOT,      0, "userdata/*" },
+
     { 00644, AID_ROOT,      AID_ROOT,      0, 0 },
 };
 
