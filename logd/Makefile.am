@@ -27,5 +27,5 @@ logd_CPPFLAGS += -DHAVE_ANDROID_OS
 logd_LDADD   = ../base/libbase.la
 logd_LDADD  += ../libutils/libutils.la
 logd_LDADD  += ../libsysutils/libsysutils.la
-logd_LDFALGS = -llog -lcutils
+logd_LDFLAGS = -llog -lcutils
 

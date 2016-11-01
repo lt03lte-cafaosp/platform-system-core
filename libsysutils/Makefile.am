@@ -11,5 +11,6 @@ libsysutils_la_SOURCES  := \
 
 libsysutils_la_CPPFLAGS := -I$(top_srcdir)/include
 libsysutils_la_CPPFLAGS += -std=c++14 -std=gnu++14 -fpermissive
+libsysutils_la_LDFLAGS   = -lcutils -llog
 
 requiredlibs = -lpthread

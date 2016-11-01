@@ -10,5 +10,5 @@ logcat_CPPFLAGS += -D_XOPEN_SOURCE
 logcat_CPPFLAGS += -DHAVE_IOCTL -DHAVE_SYS_UIO_H
 
 logcat_LDADD   =  ../base/libbase.la
-logcat_LDFALGS =  -llog -lcutils
+logcat_LDFLAGS =  -llog -lcutils
 
