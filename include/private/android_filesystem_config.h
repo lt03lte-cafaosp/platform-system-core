@@ -96,10 +96,12 @@
 #define AID_DNS_TETHER    1052  /* DNS resolution daemon (tether: dnsmasq) */
 #define AID_WEBVIEW_ZYGOTE 1053 /* WebView zygote process */
 /* Changes to this file must be made in AOSP, *not* in internal branches. */
+#define AID_REBOOTERS     1301
 
 #define AID_SHELL         2000  /* adb and debug shell user */
 #define AID_CACHE         2001  /* cache access */
 #define AID_DIAG          2002  /* access to diagnostic resources */
+#define AID_QCOM_DIAG     2009  /* can read/write /dev/diag */
 
 /* The range 2900-2999 is reserved for OEM, and must never be
  * used here */
@@ -209,10 +211,12 @@ static const struct android_id_info android_ids[] = {
     { "dns",           AID_DNS, },
     { "dns_tether",    AID_DNS_TETHER, },
     { "webview_zygote", AID_WEBVIEW_ZYGOTE, },
+    { "rebooters",     AID_REBOOTERS, },
 
     { "shell",         AID_SHELL, },
     { "cache",         AID_CACHE, },
     { "diag",          AID_DIAG, },
+    { "qcom_diag",     AID_QCOM_DIAG, },
 
     { "net_bt_admin",  AID_NET_BT_ADMIN, },
     { "net_bt",        AID_NET_BT, },
