@@ -40,6 +40,7 @@
 #include <sys/time.h>
 #include <sys/wait.h>
 
+#include <base/file.h>
 #include <cutils/list.h>
 #include <cutils/uevent.h>
 
@@ -801,21 +802,13 @@ static int load_firmware(int fw_fd, int loading_fd, int data_fd)
             ret = -1;
             break;
         }
-
-        len_to_copy -= nr;
-        while (nr > 0) {
-            ssize_t nw = 0;
-
-            nw = write(data_fd, buf + nw, nr);
-            if(nw <= 0) {
-                ret = -1;
-                goto out;
-            }
-            nr -= nw;
+        if (!android::base::WriteFully(data_fd, buf, nr)) {
+            ret = -1;
+            break;
         }
+        len_to_copy -= nr;
     }
 
-out:
     if(!ret)
         write(loading_fd, "0", 1);  /* successful end of transfer */
     else
