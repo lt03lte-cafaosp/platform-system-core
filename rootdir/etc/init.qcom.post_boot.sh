@@ -195,14 +195,16 @@ case "$target" in
 
                 for devfreq_gov in /sys/class/devfreq/soc:qcom,mincpubw*/governor
                 do
-                    if [ "cpufreq" != "$devfreq_gov" ];then
+                    node=`cat $devfreq_gov`
+                    if [ $node != "cpufreq" ] ; then
                         echo "cpufreq" > $devfreq_gov
                     fi
                 done
 
                 for devfreq_gov in /sys/class/devfreq/soc:qcom,cpubw/governor
                 do
-                    if [ "bw_hwmon" != "$devfreq_gov" ];then
+                    node=`cat $devfreq_gov`
+                    if [ $node != "bw_hwmon" ] ; then
                         echo "bw_hwmon" > $devfreq_gov
                     fi
                     for cpu_io_percent in /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/io_percent
