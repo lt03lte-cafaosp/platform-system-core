@@ -42,6 +42,60 @@ case "$1" in
 	fi
 
         case $KERNEL in
+	      4.*)
+		# get soc platform
+		if [ -f /sys/devices/soc0/hw_platform ]; then
+			socplatform=`cat /sys/devices/soc0/machine` 2> /dev/null
+		else
+			socplatform=`cat /sys/devices/system/soc/soc0/machine` 2> /dev/null
+		fi
+		echo "soc:" $socplatform
+		# find serialno from cmdline
+		cmdline=`cat /proc/cmdline` 2> /dev/null
+		strsearch="androidboot.serialno="
+		if echo "$cmdline" | grep -q "$strsearch"; then
+			startsearch=${cmdline#*$strsearch}
+			pos=$(( ${#cmdline} - ${#startsearch}))
+			serialno=${cmdline:$pos:8}
+		else
+			echo "serialno not found with cmdline, use default"
+			serialno="12345678"
+		fi
+		echo "serialno:" $serialno
+		mount -t configfs none /sys/kernel/config
+		if [ -d /sys/kernel/config/usb_gadget ]; then
+			echo "Configuring the USB gadget using ConfigFS..."
+			cd /sys/kernel/config/usb_gadget
+			mkdir g1
+			cd g1
+			mkdir strings/0x409
+			mkdir configs/c.1
+			mkdir configs/c.1/strings/0x409
+			mkdir functions/ffs.adb
+			echo "$serialno" > strings/0x409/serialnumber
+			echo "QCOM" > strings/0x409/manufacturer
+			echo "$socplatform" > strings/0x409/product
+			echo 0x18d1 > /sys/kernel/config/usb_gadget/g1/idVendor
+			echo 0x4E11 > /sys/kernel/config/usb_gadget/g1/idProduct
+			echo "ADB" > configs/c.1/strings/0x409/configuration
+		fi
+		echo "Configuring FunctionFS endpoints for adbd..."
+		if [ ! -d /dev/usb-ffs/adb ]; then
+			mkdir -p /dev/usb-ffs/adb
+		fi
+		if [ ! -e /dev/usb-ffs/adb/ep0 ]; then
+			mount -o uid=2000,gid=2000 -t functionfs adb /dev/usb-ffs/adb
+		fi
+		echo "Launching adbd..."
+		/sbin/adbd &
+		if [ -d /sys/kernel/config/usb_gadget ]; then
+			sleep 1
+			ln -s functions/ffs.adb configs/c.1/f1
+			udcname=`ls /sys/class/udc`
+			echo "binding UDC with Gadget..." $udcname
+			echo $udcname > UDC
+		fi
+			;;
           3.*)
 		case `source /sbin/usb/target` in
 			*9x15* )
