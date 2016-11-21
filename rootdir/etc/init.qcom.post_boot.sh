@@ -152,7 +152,7 @@ case "$emmc_boot"
 esac
 
 case "$target" in
-    "msm8953")
+    "msm8953" | "apq8053" )
 
         echo 128 > /sys/block/mmcblk0/bdi/read_ahead_kb
         echo 128 > /sys/block/mmcblk0/queue/read_ahead_kb
