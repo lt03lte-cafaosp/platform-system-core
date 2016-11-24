@@ -57,6 +57,9 @@ case `cat ${TARGET_DIR}` in
 	*californium* )
 		res="californium";
 		;;
+        *sdxhedgehog* )
+                res="californium";
+                ;;
 	*8953* | *8053* )
                 res="8053";
                 ;;
