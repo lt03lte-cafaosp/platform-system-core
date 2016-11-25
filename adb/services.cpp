@@ -344,13 +344,7 @@ static int create_subproc_raw(const char *cmd, const char *arg0, const char *arg
 #endif /* !defined(_WIN32) */
 }
 #endif  /* !ABD_HOST */
-
-#if ADB_HOST
 #define SHELL_COMMAND "/bin/sh"
-#else
-#define SHELL_COMMAND "/system/bin/sh"
-#endif
-
 #if !ADB_HOST
 static void subproc_waiter_service(int fd, void *cookie)
 {
