@@ -116,6 +116,22 @@
 
 #define AID_EVERYBODY     9997  /* shared between all apps in the same profile */
 #define AID_MISC          9998  /* access to misc storage */
+
+#define AID_DAEMON           1
+#define AID_BIN              2
+#define AID_SYS              3
+#define AID_ADM              4
+#define AID_TTY              5
+#define AID_DISK             6
+#define AID_KMEM            15
+#define AID_WWWDATA         33
+#define AID_BACKUP          34
+#define AID_SHADOW          42
+#define AID_UTMP            43
+#define AID_DIAG            53
+#define AID_SDCARD        1015
+#define AID_REBOOTERS     1301
+
 #define AID_NOBODY        9999
 
 #define AID_APP          10000  /* first app user */
@@ -206,6 +222,21 @@ static const struct android_id_info android_ids[] = {
 
     { "everybody",     AID_EVERYBODY, },
     { "misc",          AID_MISC, },
+
+    { "daemon",    AID_DAEMON, },
+    { "bin",       AID_BIN, },
+    { "sys",       AID_SYS, },
+    { "adm",       AID_ADM, },
+    { "tty",       AID_TTY, },
+    { "disk",      AID_DISK, },
+    { "kmem",      AID_KMEM, },
+    { "www-data",  AID_WWWDATA, },
+    { "backup",    AID_BACKUP, },
+    { "shadow",    AID_SHADOW, },
+    { "utmp",      AID_UTMP, },
+    { "diag",      AID_DIAG, },
+    { "sdcard",    AID_SDCARD, },
+    { "rebooters", AID_REBOOTERS, },
     { "nobody",        AID_NOBODY, },
 };
 
