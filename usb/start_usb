@@ -109,10 +109,6 @@ case "$1" in
 			echo 1 > /sys/devices/virtual/android_usb/android0/f_rndis_qc/max_pkt_per_xfer
 			echo 3 > /sys/module/dwc3/parameters/bulk_ep_xfer_timeout_ms
 			;;
-			*8096* )
-			ln -fs /sbin/usb/compositions/9039 \
-				/sbin/usb/boot_hsusb_composition
-			;;
 			*8909* )
 			ln -fs /sbin/usb/compositions/9091 \
 				/sbin/usb/boot_hsusb_composition
