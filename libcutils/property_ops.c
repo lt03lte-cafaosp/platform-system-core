@@ -36,7 +36,7 @@
 #include "property_ops.h"
 
 FILE *fp = NULL;
-const char *path = "/build.prop";
+const char *path = "/data/build.prop";
 char line[MAX_ALLOWED_LINE_LEN];
 char pulled[MAX_ALLOWED_LINE_LEN];
 bool firstboot = true;
