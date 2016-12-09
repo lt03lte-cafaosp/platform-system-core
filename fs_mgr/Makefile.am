@@ -19,7 +19,7 @@ fs_mgr_CFLAGS  := -I$(top_srcdir)/fs_mgr/include
 fs_mgr_LDADD   := libfs_mgr.la -lcutils -llog -lext4_utils -lmincrypt
 
 # Export headers
-fs_mgr_includedir=$(includedir)\fs_mgr
+fs_mgr_includedir=$(includedir)/fs_mgr
 fs_mgr_include_HEADERS := $(top_srcdir)/fs_mgr/include/fs_mgr.h
 
 pkgconfigdir := $(libdir)/pkgconfig
