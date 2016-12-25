@@ -111,11 +111,11 @@ case "$1" in
 			;;
 			*8909* )
 			ln -fs /sbin/usb/compositions/9091 \
-				/data/usb/boot_hsusb_composition
+				/sbin/usb/boot_hsusb_composition
 			;;
 			*8916* )
                         ln -fs /sbin/usb/compositions/9091 \
-                                /data/usb/boot_hsusb_composition
+                                /sbin/usb/boot_hsusb_composition
                         ;;
 			*9640* )
 			echo 16384 > /sys/module/g_android/parameters/rndis_dl_max_xfer_size
@@ -125,7 +125,7 @@ case "$1" in
 			;;
 			*8053* | *8017* )
 			ln -fs /sbin/usb/compositions/901D \
-                                /data/usb/boot_hsusb_composition
+                                /sbin/usb/boot_hsusb_composition
                         ;;
 
 		esac
@@ -138,15 +138,15 @@ case "$1" in
 		fi
 
 		# enable concurrent SoftAP and DUN
-		if [ -f /data/usb/softap_w_dun ]
+		if [ -f /sbin/usb/softap_w_dun ]
 		then
-			SOFTAP_W_DUN=`cat /data/usb/softap_w_dun`
+			SOFTAP_W_DUN=`cat /sbin/usb/softap_w_dun`
 		fi
 
 		# boot hsic composition:
 		if [ -d /sys/class/android_usb/android1 ]
 		then
-			/data/usb/boot_hsic_composition y
+			/sbin/usb/boot_hsic_composition y
 			# let hsic compostion script run before starting hsusb
 			sleep 1
 		fi
@@ -154,7 +154,7 @@ case "$1" in
 		# boot hsusb composition:
 		if [ -d /sys/class/android_usb/android0 ]
 		then
-			/data/usb/boot_hsusb_composition n
+			/sbin/usb/boot_hsusb_composition n
 
 			if [ "$SOFTAP_W_DUN" == "Y" ]
 			then
