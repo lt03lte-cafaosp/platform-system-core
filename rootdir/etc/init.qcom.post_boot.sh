@@ -152,6 +152,141 @@ case "$emmc_boot"
 esac
 
 case "$target" in
+    "msm8917" | "apq8017")
+        if [ -f /sys/devices/soc0/soc_id ]; then
+            soc_id=`cat /sys/devices/soc0/soc_id`
+        else
+            soc_id=`cat /sys/devices/system/soc/soc0/id`
+        fi
+
+        if [ -f /sys/devices/soc0/hw_platform ]; then
+            hw_platform=`cat /sys/devices/soc0/hw_platform`
+        else
+            hw_platform=`cat /sys/devices/system/soc/soc0/hw_platform`
+        fi
+
+        case "$soc_id" in
+           "303" | "307" | "308" | "309" )
+
+                # Apply Scheduler and Governor settings for 8917
+
+                # HMP scheduler settings
+                echo 3 > /proc/sys/kernel/sched_window_stats_policy
+                echo 3 > /proc/sys/kernel/sched_ravg_hist_size
+                echo 1 > /proc/sys/kernel/sched_restrict_tasks_spread
+
+                #disable sched_boost in 8917
+                if [ -f /proc/sys/kernel/sched_boost ]; then
+                    boost=`cat /proc/sys/kernel/sched_boost`
+                    if [ $boost != 0 ] ; then
+                        echo 0 > /proc/sys/kernel/sched_boost
+                    fi
+                fi
+
+                # HMP Task packing settings
+                echo 20 > /proc/sys/kernel/sched_small_task
+                echo 30 > /sys/devices/system/cpu/cpu0/sched_mostly_idle_load
+                echo 30 > /sys/devices/system/cpu/cpu1/sched_mostly_idle_load
+                echo 30 > /sys/devices/system/cpu/cpu2/sched_mostly_idle_load
+                echo 30 > /sys/devices/system/cpu/cpu3/sched_mostly_idle_load
+
+                echo 3 > /sys/devices/system/cpu/cpu0/sched_mostly_idle_nr_run
+                echo 3 > /sys/devices/system/cpu/cpu1/sched_mostly_idle_nr_run
+                echo 3 > /sys/devices/system/cpu/cpu2/sched_mostly_idle_nr_run
+                echo 3 > /sys/devices/system/cpu/cpu3/sched_mostly_idle_nr_run
+
+                echo 0 > /sys/devices/system/cpu/cpu0/sched_prefer_idle
+                echo 0 > /sys/devices/system/cpu/cpu1/sched_prefer_idle
+                echo 0 > /sys/devices/system/cpu/cpu2/sched_prefer_idle
+                echo 0 > /sys/devices/system/cpu/cpu3/sched_prefer_idle
+
+                # core_ctl is not needed for 8917. Disable it.
+                if [ -f /sys/devices/system/cpu/cpu0/core_ctl/disable ]; then
+                    echo 1 > /sys/devices/system/cpu/cpu0/core_ctl/disable
+                fi
+
+                for devfreq_gov in /sys/class/devfreq/soc:qcom,mincpubw*/governor
+                do
+                    node=`cat $devfreq_gov`
+                    if [ $node != "cpufreq" ] ; then
+                        echo "cpufreq" > $devfreq_gov
+                    fi
+                done
+
+                for devfreq_gov in /sys/class/devfreq/soc:qcom,cpubw/governor
+                do
+                    node=`cat $devfreq_gov`
+                    if [ $node != "bw_hwmon" ] ; then
+                        echo "bw_hwmon" > $devfreq_gov
+                    fi
+                    for cpu_io_percent in /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/io_percent
+                    do
+                        echo 20 > $cpu_io_percent
+                    done
+
+                for cpu_guard_band in /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/guard_band_mbps
+                    do
+                        echo 30 > $cpu_guard_band
+                    done
+                done
+
+                # disable thermal core_control to update interactive gov settings
+                if [ -f /sys/module/msm_thermal/core_control/enabled ]; then
+                     echo 0 > /sys/module/msm_thermal/core_control/enabled
+                fi
+
+                echo 1 > /sys/devices/system/cpu/cpu0/online
+                echo "interactive" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+                echo "19000 1094400:39000" > /sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay
+                echo 85 > /sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load
+                echo 20000 > /sys/devices/system/cpu/cpufreq/interactive/timer_rate
+                echo 1094400 > /sys/devices/system/cpu/cpufreq/interactive/hispeed_freq
+                echo 0 > /sys/devices/system/cpu/cpufreq/interactive/io_is_busy
+                echo "1 960000:85 1094400:90" > /sys/devices/system/cpu/cpufreq/interactive/target_loads
+                echo 40000 > /sys/devices/system/cpu/cpufreq/interactive/min_sample_time
+                echo 960000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+
+                # re-enable thermal core_control now
+                if [ -f /sys/module/msm_thermal/core_control/enabled ]; then
+                     echo 1 > /sys/module/msm_thermal/core_control/enabled
+                fi
+                # Disable L2-GDHS low power modes
+                echo N > /sys/module/lpm_levels/perf/perf-l2-gdhs/idle_enabled
+                echo N > /sys/module/lpm_levels/perf/perf-l2-gdhs/suspend_enabled
+
+                # Bring up all cores online
+                echo 1 > /sys/devices/system/cpu/cpu1/online
+                echo 1 > /sys/devices/system/cpu/cpu2/online
+                echo 1 > /sys/devices/system/cpu/cpu3/online
+
+                # Enable low power modes
+                echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
+
+                # Enable sched guided freq control
+                echo 1 > /sys/devices/system/cpu/cpufreq/interactive/use_sched_load
+                echo 1 > /sys/devices/system/cpu/cpufreq/interactive/use_migration_notif
+                echo 50000 > /proc/sys/kernel/sched_freq_inc_notify
+                echo 50000 > /proc/sys/kernel/sched_freq_dec_notify
+
+                # Enable dynamic clock gating
+                if [ -f /sys/module/lpm_levels/lpm_workarounds/dynamic_clock_gating ]; then
+                     echo 1 > /sys/module/lpm_levels/lpm_workarounds/dynamic_clock_gating
+                fi
+                # Enable timer migration to little cluster
+                if [ -f /proc/sys/kernel/power_aware_timer_migration ]; then
+                     echo 1 > /proc/sys/kernel/power_aware_timer_migration
+                fi
+                # Set Memory parameters
+                #configure_memory_parameters
+                ;;
+                *)
+                ;;
+        esac
+    ;;
+esac
+
+
+case "$target" in
     "msm8953" | "apq8053" )
 
         echo 128 > /sys/block/mmcblk0/bdi/read_ahead_kb
