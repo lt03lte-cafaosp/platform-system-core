@@ -568,6 +568,14 @@ case "$target" in
         echo 5 > /proc/sys/vm/dirty_background_ratio
     ;;
 esac
+
+case "$target" in
+    "apq8009" | "msm8909" )
+           echo 1 > /sys/devices/system/cpu/cpu0/online
+           echo "interactive" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+;;
+esac
+
 echo "init_qcom_post_boot completed"
 ;;
 stop)
