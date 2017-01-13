@@ -490,12 +490,12 @@ case "$target" in
         echo "interactive" > /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
         echo 1 > /sys/devices/system/cpu/cpu2/cpufreq/interactive/use_sched_load
         echo 1 > /sys/devices/system/cpu/cpu2/cpufreq/interactive/use_migration_notif
-        echo "19000 1400000:39000 1700000:19000" > /sys/devices/system/cpu/cpu2/cpufreq/interactive/above_hispeed_delay
+        echo "19000 1400000:39000 1700000:19000 2100000:79000" > /sys/devices/system/cpu/cpu2/cpufreq/interactive/above_hispeed_delay
         echo 90 > /sys/devices/system/cpu/cpu2/cpufreq/interactive/go_hispeed_load
         echo 20000 > /sys/devices/system/cpu/cpu2/cpufreq/interactive/timer_rate
         echo 1248000 > /sys/devices/system/cpu/cpu2/cpufreq/interactive/hispeed_freq
         echo 1 > /sys/devices/system/cpu/cpu2/cpufreq/interactive/io_is_busy
-        echo "85 1500000:90 1800000:70" > /sys/devices/system/cpu/cpu2/cpufreq/interactive/target_loads
+        echo "85 1500000:90 1800000:70 2100000:95" > /sys/devices/system/cpu/cpu2/cpufreq/interactive/target_loads
         echo 19000 > /sys/devices/system/cpu/cpu2/cpufreq/interactive/min_sample_time
         echo 79000 > /sys/devices/system/cpu/cpu2/cpufreq/interactive/max_freq_hysteresis
         echo 300000 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
@@ -510,8 +510,8 @@ case "$target" in
         echo "0:1324800 2:1324800" > /sys/module/cpu_boost/parameters/input_boost_freq
         echo 40 > /sys/module/cpu_boost/parameters/input_boost_ms
         # Setting b.L scheduler parameters
-        echo 95 > /proc/sys/kernel/sched_upmigrate
-        echo 90 > /proc/sys/kernel/sched_downmigrate
+        echo 45 > /proc/sys/kernel/sched_upmigrate
+        echo 45 > /proc/sys/kernel/sched_downmigrate
         echo 400000 > /proc/sys/kernel/sched_freq_inc_notify
         echo 400000 > /proc/sys/kernel/sched_freq_dec_notify
         echo 3 > /proc/sys/kernel/sched_spill_nr_run
