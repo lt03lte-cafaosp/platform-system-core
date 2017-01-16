@@ -27,8 +27,8 @@
 # Switch to a chosen USB composition.
 
 COMP_DIR="/sbin/usb/compositions"
-symlink_hsusb="/sbin/usb/boot_hsusb_composition"
-symlink_hsic="/sbin/usb/boot_hsic_composition"
+symlink_hsusb="/data/usb/boot_hsusb_composition"
+symlink_hsic="/data/usb/boot_hsic_composition"
 
 legal_composition() {
 	for c in $( ls $COMP_DIR ); do
@@ -273,13 +273,13 @@ if [ $persistent = "y" ]; then
 	if [ $hsic = "y" ]; then
 		rm $symlink_hsic
 		ln -s $COMP_DIR/$pid $symlink_hsic
-		rm /sbin/usb/compositions/hsic_next
-		echo "$pid" > /sbin/usb/compositions/hsic_next
+		rm /data/usb/hsic_next
+		echo "$pid" > /data/usb/hsic_next
 	else
 		rm $symlink_hsusb
 		ln -s $COMP_DIR/$pid $symlink_hsusb
-		rm /sbin/usb/compositions/hsusb_next
-		echo "$pid" > /sbin/usb/compositions/hsusb_next
+		rm /data/usb/hsusb_next
+		echo "$pid" > /data/usb/hsusb_next
 	fi
 fi
 
