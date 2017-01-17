@@ -455,6 +455,7 @@ case "$target" in
                 configure_memory_parameters
         ;;
         esac
+     echo mem > /sys/power/autosleep
      ;;
 
     "msm8996" | "apq8096" )
