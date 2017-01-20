@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -33,212 +33,163 @@
 #include <stdbool.h>
 #include <string.h>
 #include <malloc.h>
+#include <poll.h>
+#include <grp.h>
+#include <sys/un.h>
+#include <cutils/sockets.h>
 #include "property_ops.h"
 
-FILE *fp = NULL;
-const char *path = "/data/build.prop";
-char line[MAX_ALLOWED_LINE_LEN];
-char pulled[MAX_ALLOWED_LINE_LEN];
-bool firstboot = true;
+static int open_prop_socket()
+{
+    int fd, ret = 0;
+
+    fd = socket(PF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+    if (fd < 0) {
+        ret = -errno;
+    } else {
+        struct sockaddr_un un;
+        memset(&un, 0, sizeof(struct sockaddr_un));
+        un.sun_family = AF_UNIX;
+        snprintf(un.sun_path, sizeof(un.sun_path),
+                        ANDROID_SOCKET_DIR"/%s", PROP_SERVICE_NAME);
+
+    if (TEMP_FAILURE_RETRY(connect(fd, (struct sockaddr *)&un,
+                                       sizeof(struct sockaddr_un))) < 0) {
+            ALOGE("Failed to connect to %s socket", PROP_SERVICE_NAME);
+            close(fd);
+            ret = -errno;
+        } else {
+        ret = fd;  // return socket fd.
+        }
+    }
+    return ret;
+}
+
+static int send_setprop_msg(const char *msg)
+{
+    int fd, ret = 0;
+
+    fd = open_prop_socket();
+    if (fd < 0) {
+       ALOGE("Failed to open Socket");
+       return fd; // pass error back to caller.
+    }
+
+    int msg_len = strlen(msg);
+    const int num_bytes = TEMP_FAILURE_RETRY(send(fd, msg, msg_len, 0));
+
+    if (num_bytes == msg_len) {
+        // Successfully wrote to the property service but now wait
+        // for 250 ms for property service to finish its work. It
+        // acknowledges its completion by closing the socket.
+        struct pollfd pollfds[1];
+        pollfds[0].fd = fd;
+        pollfds[0].events = 0;
+        const int poll_result = TEMP_FAILURE_RETRY(poll(pollfds, 1, 250 /* ms */));
+        if (poll_result == 1 && (pollfds[0].revents & POLLHUP) != 0) {
+            ret = 0;
+        } else {
+            ALOGE("setprop poll timed out");
+            ret = 0; // Ignore timeout and treat it like a success.
+        }
+        LOG("Sent %d bytes of data (%s) to Socket", num_bytes, msg);
+    }
+    close(fd);
+    return ret;
+}
+
+static int send_getprop_msg(const char *msg, char *resp)
+{
+    int fd, ret = 0;
+    char recv_buf[1000];
+
+    fd = open_prop_socket();
+    if (fd < 0) {
+       ALOGE("Failed to open Socket");
+       return fd; // pass error back to caller.
+    }
+
+    int msg_len = strlen(msg);
+    const int num_bytes = TEMP_FAILURE_RETRY(send(fd, msg, msg_len, 0));
+
+    if (num_bytes == msg_len) {
+        // Successfully wrote to the property service but now wait
+        // for 250 ms for property service to finish its work. It
+        // acknowledges its completion by closing the socket.
+        struct pollfd pollfds[1];
+        pollfds[0].fd = fd;
+        pollfds[0].events = 0;
+        const int poll_result = TEMP_FAILURE_RETRY(poll(pollfds, 1, 250 /* ms */));
+        if (poll_result == 1 && (pollfds[0].revents & POLLHUP) != 0) {
+            //Handle data sent from service
+            int nbytes = recv(fd, recv_buf, sizeof(recv_buf), 0);
+            if (nbytes <= 0) {
+                ALOGE("recv failed (%s)",strerror(errno));
+                ret = -1;
+            } else {
+                recv_buf[nbytes] = '\0';
+                LOG("Received %d bytes of data (%s) from Socket",nbytes, recv_buf);
+                int i = 1;
+                while(i < strlen(recv_buf)){
+                    resp[i-1] = recv_buf[i];
+                    i++;
+                }
+                ret = 0;
+	    }
+        } else {
+            ALOGE("getprop poll timed out");
+            ret = -1; // Don't try to recv in case of time out.
+        }
+    }
+    close(fd);
+    return ret;
+}
 
 bool set_property_value(const char* prop_name, unsigned char *prop_val)
 {
-   if(firstboot){
-     create_node_from_persist(path);
-     firstboot = false;
-   }
-   return __update_prop_value(prop_name, prop_val);
+    const char msg[MAX_ALLOWED_LINE_LEN+1]; // +1 for cmd.
+    memset(msg, 0 , MAX_ALLOWED_LINE_LEN);
+
+    snprintf(msg, MAX_ALLOWED_LINE_LEN+1, "%c%s=%s",
+             PROP_MSG_SETPROP, prop_name, prop_val);
+
+    const int err = send_setprop_msg(&msg);
+    if (err < 0) {
+       ALOGE("Failed to send message to Set %s", prop_name);
+       return false;
+    }
+
+    return true;
 }
 
 bool get_property_value(const char* prop_name, unsigned char *prop_val)
 {
-   if(firstboot){
-     create_node_from_persist(path);
-     firstboot = false;
-   }
+    const char msg[MAX_ALLOWED_LINE_LEN+1]; // +1 for cmd.
+    char resp[MAX_ALLOWED_LINE_LEN];
 
-   bool retval = __retrive_prop_value(prop_name, prop_val);
+    memset(msg, 0 , MAX_ALLOWED_LINE_LEN);
+    memset(resp, 0 , MAX_ALLOWED_LINE_LEN);
 
-   if(false == retval)
-      LOG("Property: %s doesnt exist\n", prop_name);
+    snprintf(msg, MAX_ALLOWED_LINE_LEN+1, "%c%s=",
+            PROP_MSG_GETPROP, prop_name);
 
-   return retval;
-}
-
-bool __check_for_a_property(const char* prop_name)
-{
-    property_db *retval = __list_matches_prop_name(prop_name);
-    LOG("Property exist =%s \n", (retval==NULL)? "false": "true");
-    return (retval==NULL)? false: true;
-}
-
-bool save_ds_to_persist(void)
-{
-    property_db *ln = (property_db*)__get_list_head();
-    unsigned char stringtowrite[MAX_ALLOWED_LINE_LEN];
-    bool retval = false;
-    int filewrite_status = -1;
-
-    fp = fopen(path, "w");
-
-    if (NULL != fp)
-    {
-        LOG("File truncate mode\n");
-        for (; ln != NULL; ln = ln->next)
-        {
-            memset(stringtowrite, 0 , MAX_ALLOWED_LINE_LEN);
-
-            snprintf(stringtowrite, MAX_ALLOWED_LINE_LEN, "%s=%s",
-                ln->unit.property_name,ln->unit.property_value );
-
-            LOG("Writing to persist %s \n", stringtowrite);
-
-            filewrite_status = fputs(stringtowrite, fp);
-            if (filewrite_status < 0 || filewrite_status == EOF)
-            {
-                fclose(fp);
-                retval = false;
-                return retval;
-            } else {
-                retval = true;
-            }
-        }
-    } else {
-        ALOGE("File: %s doesnt exist\n", path);
-        retval = false;
+    const int err = send_getprop_msg(&msg, &resp);
+    if (err < 0) {
+       LOG("Failed to send message to Get %s", prop_name);
+       return false;
     }
 
-    if (fp)
-        fclose(fp);
+    char *delimiter = strchr(resp, '=');
+    int len = strlen(resp);
+    if (len > PROP_VALUE_MAX || len < 0) {
+        len = PROP_VALUE_MAX;
+    }
+    strncpy(prop_val, delimiter+1, len);
 
-    return retval;
-}
-
-int remove_ds_node(const char* prop_name)
-{
-    return __remove_node_from_list(prop_name);
-}
-
-bool add_ds_node(property_db *node)
-{
-    LOG("[%s] => Adding Node to DS %x\n", __func__, node);
-    return __list_add(node);
-}
-
-void dump_current_ds(void)
-{
-    __dump_nodes();
+    return true;
 }
 
 void dump_persist(void)
 {
     //TO BE IMPLEMENTED
 }
-
-property_db* __pull_one_line_data(const char* line)
-{
-    int curr_length = 0;
-    const char *curr_line_ptr = line;
-    char *delimiter = NULL;
-    int iterator = 0;
-
-    //TODO : We can do this using strtok - will be short code
-    property_db *extracted_val = (property_db*)calloc(1, sizeof(property_db)
-            *sizeof(unsigned char));
-    if (extracted_val == NULL) {
-        LOG("No Memory");
-        return extracted_val;
-    }
-    extracted_val->next = NULL; //null added here no need to add in ll.c
-    delimiter = strchr(curr_line_ptr, '=');
-
-    for(iterator=0 ; iterator< MAX_PROPERTY_ITER; iterator++)
-    {
-        LOG("[%s] => line pulled: %s", __func__,curr_line_ptr);
-
-        if(extracted_val != NULL)
-        {
-            switch (iterator)
-            {
-                case EXT_NAME:
-                    curr_length = delimiter - curr_line_ptr;
-                    if (curr_length > PROP_NAME_MAX || curr_length < 0)
-                    {
-                       curr_length = PROP_NAME_MAX;
-                    }
-                    strncpy(extracted_val->unit.property_name,
-                            curr_line_ptr, curr_length);
-                    LOG("[%s] => Extracted Name: %s\n", __func__,
-                            extracted_val->unit.property_name);
-                    break;
-
-                case EXT_VAL:
-                    curr_line_ptr = delimiter+1; //+1 for the delimiter itself
-                    curr_length = strlen(curr_line_ptr);
-                    if (curr_length > PROP_VALUE_MAX || curr_length < 0)
-                    {
-                       curr_length = PROP_VALUE_MAX;
-                    }
-                    strncpy(extracted_val->unit.property_value,
-                            curr_line_ptr, curr_length);
-                    LOG("[%s] => Extracted Value: %s\n", __func__
-                            ,extracted_val->unit.property_value);
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        LOG("[%s] => iterator: %d, curr_line_ptr: %s, delimiter: %s\n", __func__,
-                iterator,curr_line_ptr, delimiter);
-    }
-    return extracted_val;
-}
-
-bool __search_and_add_property_val(const char* fpath)
-{
-    fp = fopen(fpath, "r+");
-    int line_num =0;
-    int retval = -1;
-    bool list_add_status = false;
-    property_db *extracted_node = NULL;
-
-    LOG("%s ++",  __func__);
-    if (NULL != fp)
-    {
-        while(fgets(line, MAX_ALLOWED_LINE_LEN, fp))
-        {
-            line_num++;
-            LOG("%s, lineread = %s line_num=%d ", __func__,
-                            line, line_num);
-            extracted_node = (property_db *)__pull_one_line_data(line);
-            if (NULL != extracted_node)
-            {
-                LOG("Node Extracted, adding to list %x\n",
-                    extracted_node);
-                list_add_status = add_ds_node(extracted_node);
-                LOG("%s, extracted_node=%0x added status=%d",
-                        __func__, extracted_node,list_add_status);
-            }
-            memset(line, 0, MAX_ALLOWED_LINE_LEN);
-            continue;
-        }
-        LOG("%s, reached EOF", __func__);
-    } else {
-        LOG ("%s, no %s", __func__, line);
-        list_add_status = false;
-        return list_add_status;
-    }
-
-    if (fp)
-        fclose(fp);
-
-    return list_add_status;
-}
-
-bool create_node_from_persist(const char *filename)
-{
-    return __search_and_add_property_val(filename);
-}
-

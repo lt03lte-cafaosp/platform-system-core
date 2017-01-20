@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -29,7 +29,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef LE_PROP_OPS_H
 #define LE_PROP_OPS_H
 
@@ -45,8 +44,12 @@
 #define MAX_PROPERTY_ITER           (2)
 #define MAX_NUM_PROPERTIES          (10)
 
-extern const char *path;
+#define PROP_MSG_GETPROP '0'
+#define PROP_MSG_SETPROP '1'
 
+#define PROP_SERVICE_NAME "leprop-service"
+
+#undef  LOG_TAG
 #define LOG_TAG "le_property"
 
 #define PRI_INFO " I"
@@ -66,52 +69,11 @@ extern const char *path;
   #define LOG(fmt, args...) do {} while(0)
 #endif
 
-typedef enum {
-        LOAD_FROM_PERSIST = 1,
-        CHECK_IF_PROP_EXIST,
-        GET_PROP_VALUE,
-        SET_PROP_VALUE,
-        SAVE_DS_TO_PERSIST,
-        DUMP_CURRENT_DS,
-        DELETE_PROPERTY,
-        DEINIT_PROPERTY_SERVICE
-} user_choice;
-
-
-typedef struct property_unit{
-    unsigned char property_name[PROP_NAME_MAX];     // name of property
-    unsigned char property_value[PROP_VALUE_MAX];   // string val of property
-    bool callback_to_be_invoked;                  // should the cb be invoked
-} property_unit;
-
-typedef struct property_db{
-    property_unit unit;
-    struct property_db *next;
-} property_db;
-
-typedef enum {
-    CALLBACK_EXECUTE_PASS,
-    CALLBACK_EXECUTE_FAILED,
-} callback_state;
-
-typedef enum {
-    EXT_NAME, //name extraction index
-    EXT_VAL   //val extraction index
-} ext_value_index;
-
-typedef callback_state (*user_callback)(const char *property_name,
-                         const char* property_value);
+#define UNUSED(x) (void)(x)
 
 /***********************************************************************
 **  Exposed Functions
 ***********************************************************************/
-
-/**
- * Create the complete data list from the persist for first time
- * @param Filename as path
- * @return True on success and false otherwise
- */
-bool create_node_from_persist(const char *filename);
 
 /**
  * Get the property value for a given property name
@@ -128,60 +90,5 @@ bool get_property_value(const char*, unsigned char *);
  * @return True on success and false otherwise
  */
 bool set_property_value(const char*, unsigned char *);
-
-
-/**
- * Save the complete datastructure on RAM into persist
- * @param Void since the file and ds head are known
- * @return True on success and false otherwise
- */
-bool save_ds_to_persist(void);
-
-/**
- * Remove the list node with the matching property name
- * @param property name as char*, which has to be removed
- * @return True on success and false otherwise
- */
-int remove_ds_node(const char*);
-
-/**
- * Create the complete data list from the persist for first time
- * @param Filename as path
- * @return True on success and false otherwise
- */
-void dump_current_ds(void);
-
-/**
- * Internal function to search from the file line by line
- * and add as new nodes in the data structure
- * @param file name as path (persist file with initial values)
- * @return true for success false otherwise
- */
-bool __search_and_add_property_val(const char* fpath);
-
-/**
- * Internal function to Pull the values from property in one line
- * and line will be passed as input for parsing
- * @param file name as path (persist file with initial values)
- * @return true for success false otherwise
- */
-property_db* __pull_one_line_data(const char*);
-
-/**
- * Internal function to Pull the values from property in one line
- * and line will be passed as input for parsing
- * @param file name as path (persist file with initial values)
- * @return true for success false otherwise
- */
-bool __check_for_a_property(const char*);
-
-/**
- * UNUSED for the moment - used to dump all the persist properties
- * @param Filename as path
- * @return True on success and false otherwise
- */
-void dump_persist(void);
-
-#define UNUSED(x) (void)(x)
 
 #endif /* LE_PROP_OPS_H */
