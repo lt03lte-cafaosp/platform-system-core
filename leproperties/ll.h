@@ -36,7 +36,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <malloc.h>
-#include "property_ops.h"
+#include "property_service.h"
 
 /**
  * Check if the list is empty
