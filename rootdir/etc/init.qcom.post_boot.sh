@@ -574,6 +574,8 @@ case "$target" in
     "apq8009" | "msm8909" )
            echo 1 > /sys/devices/system/cpu/cpu0/online
            echo "interactive" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	   # Enable all LPMs by default
+	   echo N > /sys/module/lpm_levels/parameters/sleep_disabled
 ;;
 esac
 

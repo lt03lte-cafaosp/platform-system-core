@@ -179,12 +179,19 @@ bool get_property_value(const char* prop_name, unsigned char *prop_val)
        return false;
     }
 
+    // Extract prop value from response.
     char *delimiter = strchr(resp, '=');
-    int len = strlen(resp);
-    if (len > PROP_VALUE_MAX || len < 0) {
+    const char *curr_line_ptr = delimiter+1; //+1 for delimiter
+    int len = strlen(curr_line_ptr);
+
+    if (len > PROP_VALUE_MAX) {
         len = PROP_VALUE_MAX;
+    } else if (len <= 0) {
+        LOG("%s has invalid length: %d", prop_name, len);
+        return false;
     }
-    strncpy(prop_val, delimiter+1, len);
+
+    strncpy(prop_val, curr_line_ptr, len);
 
     return true;
 }
