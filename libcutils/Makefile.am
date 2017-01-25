@@ -34,7 +34,6 @@ target_sources += klog.c
 target_sources += partition_utils.c
 target_sources += properties.c
 if LE_PROPERTIES
-target_sources += ll.c
 target_sources += property_ops.c
 endif
 target_sources += qtaguid.c

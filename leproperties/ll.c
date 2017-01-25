@@ -30,8 +30,6 @@
  *****************************************************************************/
 
 #include "ll.h"
-#include "property_ops.h"
-
 
 property_db* glisthead = NULL;
 
@@ -83,7 +81,7 @@ bool __update_prop_value(const char* search_name, const char* value)
     int retval = -1;
     char property_value[PROP_VALUE_MAX];
 
-    // add  trailing new line to property value
+    // add trailing new line to property value
     memset(property_value, 0, sizeof property_value);
     strlcpy(property_value, value, sizeof property_value);
     property_value[strlen(property_value)] = '\n';
@@ -92,20 +90,24 @@ bool __update_prop_value(const char* search_name, const char* value)
     if(ln != NULL)
     {
         LOG("List Matches property Updating Value\n");
-        memset(ln->unit.property_value, 0, sizeof(ln->unit.property_value));
-        strncpy(ln->unit.property_value,  property_value,
-            strlen(property_value));
-        LOG("Value copied to the db prop name %s", search_name);
-        retval =0;
+        // ro.* properties are NEVER modified once set
+        if(!strncmp(search_name, "ro.", 3)) {
+            ALOGE("setprop(\"%s\", \"%s\") failed", search_name, property_value);
+            retval = -1;
+        } else {
+            memset(ln->unit.property_value, 0,
+                  sizeof(ln->unit.property_value));
+            strncpy(ln->unit.property_value,  property_value,
+                   strlen(property_value));
+            LOG("Value copied to the db prop name %s", search_name);
+            retval = 0;
+        }
     } else {
         LOG("New value not in the list, create a new node\n");
         retval = __create_list_and_add(search_name, property_value);
-        LOG("Node Created Status =%d for prop name %s\n", retval,
-            search_name);
+        LOG("Node Created Status =%d for prop name %s\n", retval, search_name);
     }
-    
-    save_ds_to_persist();
-    return ((retval==0)? true:false);
+    return ((retval == 0)? true:false);
 }
 
 bool __retrive_prop_value(const char* search_name, const char* value)
@@ -133,19 +135,29 @@ bool __retrive_prop_value(const char* search_name, const char* value)
 
 bool __list_add(property_db* list)
 {
-    property_db *ln;
+    property_db *node;
     if (__list_is_empty())
     {
         LOG("Adding first Node\n");
-        glisthead = list;//assumed ln comes with NULL terminated next
+        glisthead = list;//assumed list comes with NULL terminated next
     } else {
         LOG("First Node Present, add subsequent one\n");
         //check if already the property exists
-        if (NULL == __list_matches_prop_name(list->unit.property_name))
+        node = __list_matches_prop_name(list->unit.property_name);
+        if (NULL == node)
         {
-            //Add node to the end of ln.
+            //Add list to the end.
+            property_db *ln;
             for (ln = glisthead; ln->next != NULL; ln = ln->next);
             ln->next = list;//assumed ln comes with NULL terminated next
+        } else {
+            //property exists update the value
+            LOG("Node Present, updating value");
+            memset(node->unit.property_value, 0,
+                   sizeof(node->unit.property_value));
+            strncpy(node->unit.property_value, list->unit.property_value,
+                    strlen(list->unit.property_value));
+            free(list);
         }
     }
 }
@@ -204,6 +216,8 @@ bool __free_list()
             ln = ln->next;
             free(temp);
         }
+        retval = true;
+        LOG("List cleanup sucessfull\n");
     }
     return retval;
 }
