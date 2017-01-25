@@ -103,6 +103,7 @@ AC_CONFIG_FILES([ \
     logd/Makefile \
     adb/Makefile \
     fastboot/Makefile \
+    leproperties/Makefile \
     toolbox/Makefile \
     usb/Makefile \
     include/Makefile \
