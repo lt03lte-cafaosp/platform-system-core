@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
     fd_set read_fds;
     int fdmax = -1;
     socklen_t msglen;
-    char recv_buf[150];
+    char recv_buf[MAX_ALLOWED_LINE_LEN+1];
 
     if(false == load_default_properties()) {
         LOG("Failed to load default properties");
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
     fdmax = listen_fd;  //so far, only this one
 
     while (1) {
-        memset(recv_buf, 0, MAX_ALLOWED_LINE_LEN);
+        memset(recv_buf, 0, sizeof(recv_buf));
 
         if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) < 0) {
             if (errno == EINTR)
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
             nbytes = recv(conn_fd, recv_buf, sizeof(recv_buf), 0);
             if (nbytes <= 0) {
                 LOG("recv failed (%s)",strerror(errno));
-            continue;
+                continue;
             }
 
             // process data
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
                 // read data from ds and pass to client
                 property_db *node = process_getprop_msg(recv_buf);
                 const char msg[MAX_ALLOWED_LINE_LEN+1]; // +1 for cmd.
-                memset(msg, 0 , MAX_ALLOWED_LINE_LEN);
+                memset(msg, 0 , sizeof(msg));
 
                 snprintf(msg, MAX_ALLOWED_LINE_LEN+1, "%c%s=%s",
                         PROP_MSG_GETPROP, node->unit.property_name,
@@ -140,8 +140,7 @@ int process_setprop_msg(char* buff)
 {
     property_db *node = NULL;
     char line[MAX_ALLOWED_LINE_LEN];
-
-    memset(line, 0, MAX_ALLOWED_LINE_LEN);
+    memset(line, 0, sizeof(line));
 
     int i = 1;
     while(i < strlen(buff)){
@@ -176,7 +175,7 @@ property_db* process_getprop_msg(char* buff)
 {
     property_db *node = NULL;
     char line[MAX_ALLOWED_LINE_LEN];
-    memset(line, 0, MAX_ALLOWED_LINE_LEN);
+    memset(line, 0, sizeof(line));
 
     int i = 1;
     while(i < strlen(buff)){
@@ -238,7 +237,6 @@ out_close:
 bool save_persist_ds_to_file(void)
 {
     property_db *ln = (property_db*)__get_list_head();
-    unsigned char stringtowrite[MAX_ALLOWED_LINE_LEN];
     bool retval = false;
     int filewrite_status = -1;
 
@@ -252,7 +250,9 @@ bool save_persist_ds_to_file(void)
         {
             if ( strncmp("persist.", ln->unit.property_name,
                  strlen("persist.")) == 0 ) {
-                memset(stringtowrite, 0 , MAX_ALLOWED_LINE_LEN);
+
+                unsigned char stringtowrite[MAX_ALLOWED_LINE_LEN];
+                memset(stringtowrite, 0 , sizeof(stringtowrite));
 
                 snprintf(stringtowrite, MAX_ALLOWED_LINE_LEN, "%s=%s",
                      ln->unit.property_name,ln->unit.property_value );
@@ -372,12 +372,13 @@ bool search_and_add_property_val(const char* fpath)
     int retval = -1;
     bool list_add_status = false;
     property_db *extracted_node = NULL;
-    char line[MAX_ALLOWED_LINE_LEN];
 
-    memset(line, 0, MAX_ALLOWED_LINE_LEN);
     if (NULL != fp)
     {
-        while(fgets(line, MAX_ALLOWED_LINE_LEN, fp))
+        char line[MAX_ALLOWED_LINE_LEN];
+        memset(line, 0, sizeof(line));
+
+        while(fgets(line, sizeof(line), fp))
         {
             line_num++;
             LOG("%s, lineread = %s line_num=%d ", __func__,
@@ -391,7 +392,7 @@ bool search_and_add_property_val(const char* fpath)
                 LOG("%s, extracted_node=%0x added status=%d",
                         __func__, extracted_node,list_add_status);
             }
-            memset(line, 0, MAX_ALLOWED_LINE_LEN);
+            memset(line, 0, sizeof(line));
             continue;
         }
         LOG("%s, reached EOF", __func__);

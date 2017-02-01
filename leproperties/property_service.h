@@ -38,14 +38,6 @@
 #include "sys/system_properties.h"
 #include "property_ops.h"
 
-/***********************************************************************
-**  Type definitions
-***********************************************************************/
-#define MAX_ALLOWED_LINE_LEN        (PROP_NAME_MAX+PROP_VALUE_MAX+1)
-#define MAX_PROPERTY_ITER           (2)
-#define MAX_NUM_PROPERTIES          (10)
-
-
 #define PROP_FILE_DEFAULT_PATH      "/build.prop"
 #define PROP_FILE_PERSIST_PATH      "/data/persist/build.prop"
 
