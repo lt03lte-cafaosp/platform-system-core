@@ -397,9 +397,17 @@ err:
     return;
 }
 
+#define USB_COMPOSITION_SCRIPT "/data/usb/boot_hsusb_composition"
+#define UDC_DIR "/sys/class/udc"
+#define UDC_FILE_PATH "/sys/kernel/config/usb_gadget/g1/UDC"
+
 static void *usb_ffs_open_thread(void *x)
 {
     struct usb_handle *usb = (struct usb_handle *)x;
+    char value[PROPERTY_VALUE_MAX];
+    DIR *udcdir;
+    struct dirent *file;
+    int fd;
 
     while (true) {
         // wait until the USB device needs opening
@@ -418,6 +426,34 @@ static void *usb_ffs_open_thread(void *x)
         }
         property_set("sys.usb.ffs.ready", "1");
 
+	// If ConfigFS is enabled and we are running OE
+	// then perform UDC bind explicitly. The composition
+	// script check is done to detect we are running OE
+	// as it will be present only for OE userspace.
+	property_get("sys.usb.configfs", value, "");
+	if (!strncmp(value, "1", 1) &&
+		access(USB_COMPOSITION_SCRIPT, F_OK ) != -1) {
+		if ((udcdir = opendir(UDC_DIR)) != NULL) {
+			while (file = readdir(udcdir)) {
+				// Skip over . and .. directories
+				// and find first non-dir entry
+				if (file->d_type != DT_DIR)
+					break;
+			}
+			if (file) {
+				if ((fd = unix_open(UDC_FILE_PATH, O_RDWR)) != -1) {
+					if (unix_write(fd, file->d_name, strlen(file->d_name)) == -1)
+						D("[ usb_thread - failed to bind UDC ]\n");
+					unix_close(fd);
+				} else {
+					D("[ usb_thread - failed to open config fs entry for udc ]\n");
+				}
+			}
+			closedir(udcdir);
+		} else {
+			D("[ usb_thread - failed to find udc dir ]\n");
+		}
+	}
         D("[ usb_thread - registering device ]\n");
         register_usb_transport(usb, 0, 0, 1);
     }
