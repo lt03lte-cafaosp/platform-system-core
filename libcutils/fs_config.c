@@ -185,16 +185,43 @@ static const struct fs_path_config android_files[] = {
     { 00600, AID_ROOT,      AID_ROOT,      0, "system/etc/securetty" },
     { 00600, AID_ROOT,      AID_ROOT,      0, "system/etc/shadow" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/udhcpc.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/udev/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/udev/scripts/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/share/udhcpc/*" },
     { 00644, AID_ROOT,      AID_ROOT,      0, "system/etc/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/depmod.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/modprobe.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/modules-load.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/sysctl.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/systemd/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/tmpfiles.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/xdg/*" },
 
     { 04755, AID_ROOT,      AID_ROOT,      0, "system/bin/busybox" },
     { 04755, AID_ROOT,      AID_ROOT,      0, "system/bin/su.shadow" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/journalctl" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/kmod" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/loginctl" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/machinectl" },
+    { 04755, AID_ROOT,      AID_ROOT,      0, "system/bin/mount.util-linux" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/systemctl" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/systemd-ask-password" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/systemd-escape" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/systemd-firstboot" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/systemd-hwdb" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/systemd-inhibit" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/systemd-machine-id-setup" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/systemd-notify" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/systemd-sysusers" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/systemd-tmpfiles" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/systemd-tty-ask-password-agent" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/udevadm" },
+
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/lib/busybox/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/lib/busybox/bin/*" },
 
     { 04755, AID_ROOT,      AID_ROOT,      0, "system/sbin/halt.sysvinit" },
     { 04755, AID_ROOT,      AID_ROOT,      0, "system/sbin/shutdown.sysvinit" },
-
-
 
     { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/chage" },
     { 04755, AID_ROOT,      AID_ROOT,      0, "system/usr/bin/chfn.shadow" },
@@ -226,9 +253,11 @@ static const struct fs_path_config android_files[] = {
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/sbin/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/lib/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/lib64/*" },
+    { 00644, AID_ROOT,      AID_ROOT,      0, "system/lib/depmod.d/*" },
+    { 00644, AID_ROOT,      AID_ROOT,      0, "system/lib/modprobe.d/*" },
+    { 00644, AID_ROOT,      AID_ROOT,      0, "system/lib/systemd/*" },
     { 00644, AID_ROOT,      AID_ROOT,      0, "system/*" },
-
-
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/lib/busybox/sbin/*" },
     /* /usr permissions */
 
     /* suid binaries */

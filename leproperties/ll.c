@@ -77,7 +77,6 @@ bool __create_list_and_add( const char* search_name, const char* property_value)
 
 bool __update_prop_value(const char* search_name, const char* value)
 {
-    property_db *ln = NULL;
     int retval = -1;
     char property_value[PROP_VALUE_MAX];
 
@@ -86,13 +85,13 @@ bool __update_prop_value(const char* search_name, const char* value)
     strlcpy(property_value, value, sizeof property_value);
     property_value[strlen(property_value)] = '\n';
 
-    ln = __list_matches_prop_name(search_name);
+    property_db *ln = __list_matches_prop_name(search_name);
     if(ln != NULL)
     {
         LOG("List Matches property Updating Value\n");
         // ro.* properties are NEVER modified once set
         if(!strncmp(search_name, "ro.", 3)) {
-            ALOGE("setprop(\"%s\", \"%s\") failed", search_name, property_value);
+            LOG("setprop(\"%s\", \"%s\") failed", search_name, property_value);
             retval = -1;
         } else {
             memset(ln->unit.property_value, 0,
