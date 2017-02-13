@@ -301,6 +301,11 @@ on late-init
 
 on post-fs
     start logd
+
+    start servicemanager
+    start qcamerasvr
+    start qmmf-server
+
     # once everything is setup, no need to modify /
     mount rootfs rootfs / ro remount
     # Mount shared so changes propagate into child namespaces
