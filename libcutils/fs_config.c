@@ -217,11 +217,15 @@ static const struct fs_path_config android_files[] = {
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/libexec/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/kernel-tests/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/kernel-tests/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/data/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/etc/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/usr/lib64/*" },
 
     { 00644, AID_ROOT,      AID_ROOT,      0, "system/usr/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/bin/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/sbin/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/lib/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/lib64/*" },
     { 00644, AID_ROOT,      AID_ROOT,      0, "system/*" },
 
 
