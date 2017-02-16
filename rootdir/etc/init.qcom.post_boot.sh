@@ -460,6 +460,7 @@ case "$target" in
 
     "msm8996" | "apq8096" )
         # disable thermal bcl hotplug to switch governor
+        setprop persist.camera.af.infinity 1
         echo 0 > /sys/module/msm_thermal/core_control/enabled
         echo -n disable > /sys/devices/soc/soc:qcom,bcl/mode
         bcl_hotplug_mask=`cat /sys/devices/soc/soc:qcom,bcl/hotplug_mask`
