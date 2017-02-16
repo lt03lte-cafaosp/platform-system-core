@@ -26,7 +26,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 
 [Unit]
-SourcePath=/etc/init.d/adbd
+SourcePath=/etc/launch_adbd
 Description=adbd Service
 After=usb.service
 
@@ -38,5 +38,5 @@ IgnoreSIGPIPE=no
 KillMode=process
 GuessMainPID=no
 RemainAfterExit=yes
-ExecStart=/etc/init.d/adbd start
-ExecStop=/etc/init.d/adbd stop
+ExecStart=/etc/launch_adbd start
+ExecStop=/etc/launch_adbd stop
