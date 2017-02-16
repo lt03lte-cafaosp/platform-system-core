@@ -128,7 +128,6 @@
 #define AID_BACKUP          34
 #define AID_SHADOW          42
 #define AID_UTMP            43
-#define AID_DIAG            53
 #define AID_SDCARD        1015
 #define AID_REBOOTERS     1301
 
