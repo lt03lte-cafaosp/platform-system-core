@@ -82,7 +82,7 @@ case `source /sbin/usb/target` in
 	*9640* )
 		run_9x35 &
 		;;
-	*californium* )
+	*9650* )
 		run_9x35 &
 		;;
 	* )

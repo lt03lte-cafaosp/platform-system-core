@@ -94,7 +94,7 @@ run_9607() {
 	fi
 }
 
-run_californium() {
+run_9650() {
 	if [ $from_adb = "n" ]
 	then
 		pkill adbd
@@ -123,8 +123,8 @@ case `source /sbin/usb/target` in
 	*8909* )
 		echo "This composition can't be supported on 8909 "
 		;;
-	*californium* )
-		run_californium &
+	*9650* )
+		run_9650 &
 		;;
 	* )
 		run_9x35 &
