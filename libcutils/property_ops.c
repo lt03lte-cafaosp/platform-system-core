@@ -100,15 +100,13 @@ static int send_setprop_msg(const char *msg)
 
 static int send_getprop_msg(const char *msg, char *resp)
 {
-    int fd, ret = 0;
-    char recv_buf[1000];
-
-    fd = open_prop_socket();
+    int fd = open_prop_socket();
     if (fd < 0) {
        ALOGE("Failed to open Socket");
        return fd; // pass error back to caller.
     }
 
+    int ret = 0;
     int msg_len = strlen(msg);
     const int num_bytes = TEMP_FAILURE_RETRY(send(fd, msg, msg_len, 0));
 
@@ -122,6 +120,8 @@ static int send_getprop_msg(const char *msg, char *resp)
         const int poll_result = TEMP_FAILURE_RETRY(poll(pollfds, 1, 250 /* ms */));
         if (poll_result == 1 && (pollfds[0].revents & POLLHUP) != 0) {
             //Handle data sent from service
+            char recv_buf[MAX_ALLOWED_LINE_LEN+1];
+            memset(recv_buf, 0 , sizeof(recv_buf));
             int nbytes = recv(fd, recv_buf, sizeof(recv_buf), 0);
             if (nbytes <= 0) {
                 ALOGE("recv failed (%s)",strerror(errno));
@@ -135,7 +135,7 @@ static int send_getprop_msg(const char *msg, char *resp)
                     i++;
                 }
                 ret = 0;
-	    }
+            }
         } else {
             ALOGE("getprop poll timed out");
             ret = -1; // Don't try to recv in case of time out.
@@ -147,8 +147,8 @@ static int send_getprop_msg(const char *msg, char *resp)
 
 bool set_property_value(const char* prop_name, unsigned char *prop_val)
 {
-    const char msg[MAX_ALLOWED_LINE_LEN+1]; // +1 for cmd.
-    memset(msg, 0 , MAX_ALLOWED_LINE_LEN);
+    const char msg[MAX_ALLOWED_LINE_LEN+1]; // +1 for msg type.
+    memset(msg, 0 , sizeof msg);
 
     snprintf(msg, MAX_ALLOWED_LINE_LEN+1, "%c%s=%s",
              PROP_MSG_SETPROP, prop_name, prop_val);
@@ -164,13 +164,13 @@ bool set_property_value(const char* prop_name, unsigned char *prop_val)
 
 bool get_property_value(const char* prop_name, unsigned char *prop_val)
 {
-    const char msg[MAX_ALLOWED_LINE_LEN+1]; // +1 for cmd.
+    const char msg[MAX_ALLOWED_LINE_LEN+1]; // +1 for msg type.
     char resp[MAX_ALLOWED_LINE_LEN];
 
-    memset(msg, 0 , MAX_ALLOWED_LINE_LEN);
-    memset(resp, 0 , MAX_ALLOWED_LINE_LEN);
+    memset(msg,  0 , sizeof(msg));
+    memset(resp, 0 , sizeof(resp));
 
-    snprintf(msg, MAX_ALLOWED_LINE_LEN+1, "%c%s=",
+    snprintf(msg, sizeof msg, "%c%s=",
             PROP_MSG_GETPROP, prop_name);
 
     const int err = send_getprop_msg(&msg, &resp);
@@ -179,12 +179,15 @@ bool get_property_value(const char* prop_name, unsigned char *prop_val)
        return false;
     }
 
+    // Extract prop value from response.
     char *delimiter = strchr(resp, '=');
-    int len = strlen(resp);
-    if (len > PROP_VALUE_MAX || len < 0) {
-        len = PROP_VALUE_MAX;
+    const char *curr_line_ptr = delimiter+1; //+1 for delimiter
+    if(strlen(curr_line_ptr) <= 0) {
+        LOG("%s has invalid length", prop_name);
+        return false;
     }
-    strncpy(prop_val, delimiter+1, len);
+
+    strlcpy(prop_val, curr_line_ptr, PROP_VALUE_MAX);
 
     return true;
 }

@@ -72,6 +72,7 @@ case "$1" in
 		echo "$serialno" > strings/0x409/serialnumber
 		echo "QCOM" > strings/0x409/manufacturer
 		echo "$socplatform" > strings/0x409/product
+		setprop sys.usb.configfs 1
 	fi
 
 	# mount functionfs

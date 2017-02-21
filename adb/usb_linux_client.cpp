@@ -336,33 +336,35 @@ static void init_functionfs(struct usb_handle *h)
     v2_descriptor.hs_descs = hs_descriptors;
     v2_descriptor.ss_descs = ss_descriptors;
 
-    D("OPENING %s\n", USB_FFS_ADB_EP0);
-    h->control = adb_open(USB_FFS_ADB_EP0, O_RDWR);
-    if (h->control < 0) {
-        D("[ %s: cannot open control endpoint: errno=%d]\n", USB_FFS_ADB_EP0, errno);
-        goto err;
-    }
-
-    ret = adb_write(h->control, &v2_descriptor, sizeof(v2_descriptor));
-    if (ret < 0) {
-        v1_descriptor.header.magic = cpu_to_le32(FUNCTIONFS_DESCRIPTORS_MAGIC);
-        v1_descriptor.header.length = cpu_to_le32(sizeof(v1_descriptor));
-        v1_descriptor.header.fs_count = 3;
-        v1_descriptor.header.hs_count = 3;
-        v1_descriptor.fs_descs = fs_descriptors;
-        v1_descriptor.hs_descs = hs_descriptors;
-        D("[ %s: Switching to V1_descriptor format errno=%d ]\n", USB_FFS_ADB_EP0, errno);
-        ret = adb_write(h->control, &v1_descriptor, sizeof(v1_descriptor));
-        if (ret < 0) {
-            D("[ %s: write descriptors failed: errno=%d ]\n", USB_FFS_ADB_EP0, errno);
+    if (h->control < 0) { // might have already done this before
+        D("OPENING %s\n", USB_FFS_ADB_EP0);
+        h->control = adb_open(USB_FFS_ADB_EP0, O_RDWR);
+        if (h->control < 0) {
+            D("[ %s: cannot open control endpoint: errno=%d]\n", USB_FFS_ADB_EP0, errno);
             goto err;
         }
-    }
 
-    ret = adb_write(h->control, &strings, sizeof(strings));
-    if (ret < 0) {
-        D("[ %s: writing strings failed: errno=%d]\n", USB_FFS_ADB_EP0, errno);
-        goto err;
+        ret = adb_write(h->control, &v2_descriptor, sizeof(v2_descriptor));
+        if (ret < 0) {
+            v1_descriptor.header.magic = cpu_to_le32(FUNCTIONFS_DESCRIPTORS_MAGIC);
+            v1_descriptor.header.length = cpu_to_le32(sizeof(v1_descriptor));
+            v1_descriptor.header.fs_count = 3;
+            v1_descriptor.header.hs_count = 3;
+            v1_descriptor.fs_descs = fs_descriptors;
+            v1_descriptor.hs_descs = hs_descriptors;
+            D("[ %s: Switching to V1_descriptor format errno=%d ]\n", USB_FFS_ADB_EP0, errno);
+            ret = adb_write(h->control, &v1_descriptor, sizeof(v1_descriptor));
+            if (ret < 0) {
+                D("[ %s: write descriptors failed: errno=%d ]\n", USB_FFS_ADB_EP0, errno);
+                goto err;
+            }
+        }
+
+        ret = adb_write(h->control, &strings, sizeof(strings));
+        if (ret < 0) {
+            D("[ %s: writing strings failed: errno=%d]\n", USB_FFS_ADB_EP0, errno);
+            goto err;
+        }
     }
 
     h->bulk_out = adb_open(USB_FFS_ADB_OUT, O_RDWR);
@@ -395,27 +397,63 @@ err:
     return;
 }
 
+#define USB_COMPOSITION_SCRIPT "/data/usb/boot_hsusb_composition"
+#define UDC_DIR "/sys/class/udc"
+#define UDC_FILE_PATH "/sys/kernel/config/usb_gadget/g1/UDC"
+
 static void *usb_ffs_open_thread(void *x)
 {
     struct usb_handle *usb = (struct usb_handle *)x;
+    char value[PROPERTY_VALUE_MAX];
+    DIR *udcdir;
+    struct dirent *file;
+    int fd;
 
     while (true) {
         // wait until the USB device needs opening
         adb_mutex_lock(&usb->lock);
-        while (usb->control != -1)
+        while (usb->control != -1 && usb->bulk_in != -1 && usb->bulk_out != -1)
             adb_cond_wait(&usb->notify, &usb->lock);
         adb_mutex_unlock(&usb->lock);
 
         while (true) {
             init_functionfs(usb);
 
-            if (usb->control >= 0)
+            if (usb->control >= 0 && usb->bulk_in >= 0 && usb->bulk_out >= 0)
                 break;
 
             adb_sleep_ms(1000);
         }
         property_set("sys.usb.ffs.ready", "1");
 
+	// If ConfigFS is enabled and we are running OE
+	// then perform UDC bind explicitly. The composition
+	// script check is done to detect we are running OE
+	// as it will be present only for OE userspace.
+	property_get("sys.usb.configfs", value, "");
+	if (!strncmp(value, "1", 1) &&
+		access(USB_COMPOSITION_SCRIPT, F_OK ) != -1) {
+		if ((udcdir = opendir(UDC_DIR)) != NULL) {
+			while (file = readdir(udcdir)) {
+				// Skip over . and .. directories
+				// and find first non-dir entry
+				if (file->d_type != DT_DIR)
+					break;
+			}
+			if (file) {
+				if ((fd = unix_open(UDC_FILE_PATH, O_RDWR)) != -1) {
+					if (unix_write(fd, file->d_name, strlen(file->d_name)) == -1)
+						D("[ usb_thread - failed to bind UDC ]\n");
+					unix_close(fd);
+				} else {
+					D("[ usb_thread - failed to open config fs entry for udc ]\n");
+				}
+			}
+			closedir(udcdir);
+		} else {
+			D("[ usb_thread - failed to find udc dir ]\n");
+		}
+	}
         D("[ usb_thread - registering device ]\n");
         register_usb_transport(usb, 0, 0, 1);
     }
@@ -501,10 +539,13 @@ static void usb_ffs_kick(usb_handle *h)
         D("[ kick: sink (fd=%d) clear halt failed (%d) ]", h->bulk_out, errno);
 
     adb_mutex_lock(&h->lock);
-    adb_close(h->control);
+
+    // don't close ep0 here, since we may not need to reinitialize it with
+    // the same descriptors again. if however ep1/ep2 fail to re-open in
+    // init_functionfs, only then would we close and open ep0 again.
     adb_close(h->bulk_out);
     adb_close(h->bulk_in);
-    h->control = h->bulk_out = h->bulk_in = -1;
+    h->bulk_out = h->bulk_in = -1;
 
     // notify usb_ffs_open_thread that we are disconnected
     adb_cond_signal(&h->notify);
