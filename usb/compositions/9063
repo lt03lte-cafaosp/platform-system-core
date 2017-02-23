@@ -104,7 +104,7 @@ run_9607() {
 	echo 1 > /sys/class/android_usb/android$num/enable
 }
 
-run_californium() {
+run_9650() {
 	pkill adbd
 	echo 0 > /sys/class/android_usb/android$num/enable
 	echo 9063 > /sys/class/android_usb/android$num/idProduct
@@ -137,8 +137,8 @@ case `source /sbin/usb/target` in
 	*9640* )
 		run_9x35 &
 		;;
-	*californium* )
-		run_californium &
+	*9650* )
+		run_9650 &
 		;;
 	* )
 		run_9x15 &
