@@ -58,7 +58,7 @@ case `cat ${TARGET_DIR}` in
 		res="9650";
 		;;
         *sdxhedgehog* )
-		res="9650";
+		res="sdxhedgehog";
                 ;;
 	*8953* | *8053* )
                 res="8053";
