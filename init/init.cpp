@@ -164,7 +164,7 @@ static int wait_for_coldboot_done_action(const std::vector<std::string>& args) {
 #ifdef COLDBOOT_TIMEOUT_OVERRIDE
     timeout = COLDBOOT_TIMEOUT_OVERRIDE;
 #else
-    timeout = 5;
+    timeout = 15;
 #endif
     NOTICE("Waiting for %s...\n", COLDBOOT_DONE);
     // Any longer than 1s is an unreasonable length of time to delay booting.
