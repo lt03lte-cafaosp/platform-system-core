@@ -106,6 +106,25 @@ run_9650() {
 	fi
 }
 
+run_sdxhedgehog() {
+	if [ $from_adb = "n" ]
+	then
+		pkill adbd
+	fi
+	echo 0 > /sys/class/android_usb/android$num/enable
+	echo 9091 > /sys/class/android_usb/android$num/idProduct
+	echo 05C6 > /sys/class/android_usb/android$num/idVendor
+	echo diag > /sys/class/android_usb/android0/f_diag/clients
+	echo char_bridge > /sys/class/android_usb/android0/f_serial/transports
+	echo diag,serial,rmnet_gsi,adb > /sys/class/android_usb/android$num/functions
+	sleep $delay
+	echo 1 > /sys/class/android_usb/android$num/enable
+	if [ $from_adb = "n" ]
+	then
+		/etc/init.d/adbd start
+	fi
+}
+
 case `source /sbin/usb/target` in
 	*9x35* )
 		run_9x35 &
@@ -124,6 +143,9 @@ case `source /sbin/usb/target` in
 		;;
 	*9650* )
 		run_9650 &
+		;;
+	*sdxhedgehog* )
+		run_sdxhedgehog &
 		;;
 	* )
 		run_9x35 &
