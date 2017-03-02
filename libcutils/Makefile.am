@@ -61,6 +61,7 @@ endif # !ARM
 lib_LTLIBRARIES := libcutils.la
 libcutils_la_SOURCES := $(libcutils_a_SOURCES)
 libcutils_la_CPPFLAGS := $(libcutils_a_CPPFLAGS)
+libcutils_la_LIBADD := ../liblog/liblog.la
 
 pkgconfigdir := $(libdir)/pkgconfig
 pkgconfig_DATA := libcutils.pc
