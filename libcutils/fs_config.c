@@ -157,7 +157,8 @@ static const struct fs_path_config android_files[] = {
 #endif
     /* rootfs permissions */
 
-
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/system" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/system/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc.d/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc0.d/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc1.d/*" },
