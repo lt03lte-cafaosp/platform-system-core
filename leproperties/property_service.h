@@ -40,6 +40,8 @@
 
 #define PROP_FILE_DEFAULT_PATH      "/build.prop"
 #define PROP_FILE_PERSIST_PATH      "/data/persist/build.prop"
+#define PROP_TRIGGER                "/etc/proptrigger.sh"
+#define PROP_TRIGGER_CONF           "/etc/proptrigger.conf"
 
 #undef  LOG_TAG
 #define LOG_TAG "leprop-service"
