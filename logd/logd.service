@@ -27,16 +27,15 @@
 
 
 [Unit]
-SourcePath=/etc/init.d/logd
+SourcePath=/etc/initscripts/logd
 Description=logd Service
 
 [Service]
 Type=forking
 Restart=no
-TimeoutSec=5min
 IgnoreSIGPIPE=no
 KillMode=process
 GuessMainPID=no
 RemainAfterExit=yes
-ExecStart=/etc/init.d/logd start
-ExecStop=/etc/init.d/logd stop
+ExecStart=/etc/initscripts/logd start
+ExecStop=/etc/initscripts/logd stop
