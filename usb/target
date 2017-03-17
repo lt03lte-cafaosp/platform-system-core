@@ -48,8 +48,8 @@ case `cat ${TARGET_DIR}` in
 	*9640* )
 		res="9640";
 		;;
-	*californium* )
-		res="californium";
+	*9650* )
+		res="9650";
 		;;
 	*8053* )
                 res="8053";
