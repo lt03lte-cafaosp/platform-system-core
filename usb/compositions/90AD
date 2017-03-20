@@ -66,7 +66,7 @@ run_9x35() {
 	echo 1 > /sys/class/android_usb/android$num/enable
 	if [ $from_adb = "n" ]
 	then
-		/etc/init.d/adbd start
+		/etc/launch_adbd start
 	fi
 }
 
@@ -90,7 +90,7 @@ run_9607() {
 	echo 1 > /sys/class/android_usb/android$num/enable
 	if [ $from_adb = "n" ]
 	then
-		/etc/init.d/adbd start
+		/etc/launch_adbd start
 	fi
 }
 
@@ -109,7 +109,7 @@ run_9650() {
 	echo 1 > /sys/class/android_usb/android$num/enable
 	if [ $from_adb = "n" ]
 	then
-		/etc/init.d/adbd start
+		/etc/launch_adbd start
 	fi
 }
 
@@ -128,7 +128,7 @@ run_sdxhedgehog() {
 	echo 1 > /sys/class/android_usb/android$num/enable
 	if [ $from_adb = "n" ]
 	then
-		/etc/init.d/adbd start
+		/etc/launch_adbd start
 	fi
 }
 

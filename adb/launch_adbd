@@ -1,4 +1,6 @@
-# Copyright (c) 2016, The Linux Foundation. All rights reserved.
+#! /bin/sh
+#
+# Copyright (c) 2017, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -25,18 +27,29 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 
+set -e
 
-[Unit]
-SourcePath=/etc/initscripts/usb
-Description=usb Service
+if [ -f /etc/default/adbd ]; then
+        . /etc/default/adbd
+fi
+echo -n "Starting adbd: "
+start-stop-daemon -S -b -a /sbin/adbd
+# Check first if the /data/adb_devid already has an id saved from earlier boot up.
+# If yes use it to retrieve adb devices else use the msm ID and save it to /data/adb_devid for subsequent boot ups.
+if [ -e "/data/adb_devid" ]
+then
+      cat /data/adb_devid > /sys/class/android_usb/android0/iSerial
+else
+      ret_val=`cat /proc/cmdline | grep "androidboot.serialno" |wc -l`
 
-[Service]
-Type=forking
-Restart=no
-TimeoutSec=5min
-IgnoreSIGPIPE=no
-KillMode=process
-GuessMainPID=no
-RemainAfterExit=yes
-ExecStart=/etc/initscripts/usb start
-ExecStop=/etc/initscripts/usb stop
+if  [ $ret_val -eq 1 ]
+then
+    serial_no=`cat /proc/cmdline | awk '{ for ( n=1; n<=NF; n++ ) if($n ~ "androidboot.serial") print $n }' | awk '{split($0,a, "=");print a[2]}'`
+    echo $serial_no > /sys/class/android_usb/android0/iSerial
+else
+    cat /proc/sys/kernel/random/boot_id | cut -d- -f5 > /sys/class/android_usb/android0/iSerial
+fi
+    cat /sys/class/android_usb/android0/iSerial > /data/adb_devid
+fi
+echo "done"
+exit 0
