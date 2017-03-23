@@ -29,6 +29,8 @@
 [Unit]
 SourcePath=/etc/initscripts/usb
 Description=usb Service
+After=mount-data.service
+Requires=mount-data.service
 
 [Service]
 Type=forking
