@@ -39,6 +39,7 @@ case "$1" in
 	# get soc platform to update product related information
 	if [ -f /sys/devices/soc0/hw_platform ]; then
 		socplatform=`cat /sys/devices/soc0/machine` 2> /dev/null
+		soc_hwplatform=`cat /sys/devices/soc0/hw_platform`
 	else
 		socplatform=`cat /sys/devices/system/soc/soc0/machine` 2> /dev/null
 	fi
@@ -57,6 +58,10 @@ case "$1" in
 	fi
 	echo "serialno:" $serialno
 
+	msm_serial=`cat /sys/devices/soc0/serial_number`
+	msm_serial_hex=`printf %08X $msm_serial`
+	product_string="$socplatform-$soc_hwplatform _SN:$msm_serial_hex"
+
 	# try to mount configfs, and create instance of USB functions if it goes through
 	mount -t configfs none /sys/kernel/config
 	if [ -d /sys/kernel/config/usb_gadget ]; then
@@ -72,7 +77,13 @@ case "$1" in
 		echo "$serialno" > strings/0x409/serialnumber
 		echo "QCOM" > strings/0x409/manufacturer
 		echo "$socplatform" > strings/0x409/product
+		echo "$product_string" > /config/usb_gadget/g1/strings/0x409/product
 		setprop sys.usb.configfs 1
+	fi
+
+	if [ -d /sys/class/android_usb/android0 ]
+	then
+		echo "$product_string" > /sys/class/android_usb/android0/iProduct
 	fi
 
 	# mount functionfs
