@@ -261,6 +261,7 @@ case "$target" in
 
                 # Enable low power modes
                 echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
+                echo mem > /sys/power/autosleep
 
                 # Enable sched guided freq control
                 echo 1 > /sys/devices/system/cpu/cpufreq/interactive/use_sched_load
