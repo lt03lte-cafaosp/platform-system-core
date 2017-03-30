@@ -106,7 +106,7 @@ run_9650() {
 	fi
 }
 
-run_sdxhedgehog() {
+run_sdx20() {
 	if [ $from_adb = "n" ]
 	then
 		pkill adbd
@@ -144,8 +144,8 @@ case `source /sbin/usb/target` in
 	*9650* )
 		run_9650 &
 		;;
-	*sdxhedgehog* )
-		run_sdxhedgehog &
+	*sdx20* )
+		run_sdx20 &
 		;;
 	* )
 		run_9x35 &
