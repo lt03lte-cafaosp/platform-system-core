@@ -157,7 +157,8 @@ static const struct fs_path_config android_files[] = {
 #endif
     /* rootfs permissions */
 
-
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/system" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/system/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc.d/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc0.d/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/rc1.d/*" },
@@ -172,6 +173,7 @@ static const struct fs_path_config android_files[] = {
     { 00600, AID_ROOT,      AID_ROOT,      0, "system/etc/group-" },
     { 00600, AID_ROOT,      AID_ROOT,      0, "system/etc/gshadow" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/init.d/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/launch_adbd" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/mdev/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/network/if-down-up.d/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/network/if-post-down.d/*" },
@@ -188,6 +190,7 @@ static const struct fs_path_config android_files[] = {
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/udev/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/udev/scripts/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/share/udhcpc/*" },
+    { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/initscripts/*" },
     { 00644, AID_ROOT,      AID_ROOT,      0, "system/etc/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/depmod.d/*" },
     { 00755, AID_ROOT,      AID_ROOT,      0, "system/etc/modprobe.d/*" },
