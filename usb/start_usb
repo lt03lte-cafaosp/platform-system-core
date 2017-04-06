@@ -25,6 +25,12 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Starts the USB Android Gadget.
+wait_for_data_mount() {
+  while ! [ -d /data/usb ]
+  do
+	echo "waiting for /data to mount"
+  done
+}
 
 export KERNEL=`uname -r`
 export SOFTAP_W_DUN="N"
@@ -95,6 +101,7 @@ case "$1" in
 			echo 3 > /sys/module/dwc3/parameters/bulk_ep_xfer_timeout_ms
 			;;
 		*8909* )
+			wait_for_data_mount
 			ln -fs /sbin/usb/compositions/9091 /data/usb/boot_hsusb_composition
 			;;
 		*8916* )
@@ -107,6 +114,7 @@ case "$1" in
 			echo 16384 > /sys/module/g_android/parameters/gsi_in_rndis_aggr_size
 			;;
 		*8053* | *8017* )
+			wait_for_data_mount
 			ln -fs /sbin/usb/compositions/901D /data/usb/boot_hsusb_composition
 		        ;;
 	esac

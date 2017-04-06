@@ -61,12 +61,12 @@ run_9x35() {
 	echo 1 > /sys/class/android_usb/android$num/enable
 	if [ $from_adb = "n" ]
 	then
-		/etc/init.d/adbd start
+		/etc/launch_adbd start
 	fi
 }
 
 run_8098() {
-	/etc/init.d/adbd start
+	/etc/launch_adbd start
 	sleep 1
 	cd /sys/kernel/config/usb_gadget/g1
 	echo 0x05c6 > idVendor
