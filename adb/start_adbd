@@ -55,6 +55,7 @@ case "$1" in
                     cat /proc/sys/kernel/random/boot_id | cut -d- -f5 > /sys/class/android_usb/android0/iSerial
                 fi
                     cat /sys/class/android_usb/android0/iSerial > /data/adb_devid
+                    sync
         fi
         echo "done" > /dev/kmsg
         ;;
