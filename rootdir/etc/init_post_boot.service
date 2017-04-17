@@ -27,7 +27,7 @@
 
 
 [Unit]
-SourcePath=/etc/init.d/init_post_boot
+SourcePath=/etc/initscripts/init_post_boot
 Description=QTI Post Boot Service
 
 [Service]
@@ -38,5 +38,5 @@ IgnoreSIGPIPE=no
 KillMode=process
 GuessMainPID=no
 RemainAfterExit=yes
-ExecStart=/etc/init.d/init_post_boot start
-ExecStop=/etc/init.d/init_post_boot stop
+ExecStart=/etc/initscripts/init_post_boot start
+ExecStop=/etc/initscripts/init_post_boot stop
