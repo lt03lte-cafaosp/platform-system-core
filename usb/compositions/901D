@@ -87,7 +87,11 @@ case `source /sbin/usb/target` in
 		run_9x35 &
 		;;
         *8096* )
-                run_9x35 &
+		if [ -f /sys/class/android_usb/android$num/enable ]; then
+			run_9x35 &
+		else
+			run_8098 &
+		fi
                 ;;
 	*8098* )
 		run_8098 &

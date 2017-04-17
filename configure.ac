@@ -86,6 +86,12 @@ AC_ARG_WITH([logd-logging],
 
 AM_CONDITIONAL(USE_LOGD, [test "x${with_logd_logging}" = "xyes"])
 
+AC_ARG_ENABLE(adb-root,
+      AC_HELP_STRING([--disable-adb-root], [Disable root privileges for adbd]),
+         [adb_root=${enableval}], [adb_root="yes"])
+
+AM_CONDITIONAL(ADB_ROOT, [test "x${adb_root}" = "xyes"])
+
 AC_CONFIG_FILES([ \
     Makefile \
     libutils/Makefile \
