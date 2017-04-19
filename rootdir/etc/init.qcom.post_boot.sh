@@ -569,6 +569,10 @@ case "$target" in
         # Tweak background writeout
         echo 200 > /proc/sys/vm/dirty_expire_centisecs
         echo 5 > /proc/sys/vm/dirty_background_ratio
+
+        # Set panic as hung and keep SLPI alive during panic
+        echo 0 > /proc/sys/kernel/panic
+        echo 1 > /sys/devices/soc/1c00000.qcom,ssc/subsys4/keep_alive
     ;;
 
     "msm8996pro" )
