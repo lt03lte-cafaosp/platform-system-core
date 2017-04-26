@@ -569,6 +569,33 @@ case "$target" in
         # Tweak background writeout
         echo 200 > /proc/sys/vm/dirty_expire_centisecs
         echo 5 > /proc/sys/vm/dirty_background_ratio
+
+        # Set panic as hung and keep SLPI alive during panic
+        echo 0 > /proc/sys/kernel/panic
+        echo 1 > /sys/devices/soc/1c00000.qcom,ssc/subsys4/keep_alive
+    ;;
+
+    "msm8996pro" )
+        soc_revision=`cat /sys/devices/soc0/revision`
+        if [ "$soc_revision" == "2.0" ]; then
+            #Disable suspend for v2.0
+            echo pwr_dbg > /sys/power/wake_lock
+        elif [ "$soc_revision" == "2.1" ]; then
+            # Enable C4.D4.E4.M3 LPM modes
+            # Disable D3 state
+            echo 0 > /sys/module/lpm_levels/system/pwr/pwr-l2-gdhs/idle_enabled
+            echo 0 > /sys/module/lpm_levels/system/perf/perf-l2-gdhs/idle_enabled
+            # Disable DEF-FPC mode
+            echo N > /sys/module/lpm_levels/system/pwr/cpu0/fpc-def/idle_enabled
+            echo N > /sys/module/lpm_levels/system/pwr/cpu1/fpc-def/idle_enabled
+            echo N > /sys/module/lpm_levels/system/perf/cpu2/fpc-def/idle_enabled
+            echo N > /sys/module/lpm_levels/system/perf/cpu3/fpc-def/idle_enabled
+        else
+            # Enable all LPMs by default
+            # This will enable C4, D4, D3, E4 and M3 LPMs
+            echo N > /sys/module/lpm_levels/parameters/sleep_disabled
+        fi
+        echo N > /sys/module/lpm_levels/parameters/sleep_disabled
     ;;
 esac
 

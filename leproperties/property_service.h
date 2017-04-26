@@ -40,15 +40,11 @@
 
 #define PROP_FILE_DEFAULT_PATH      "/build.prop"
 #define PROP_FILE_PERSIST_PATH      "/data/persist/build.prop"
+#define PROP_TRIGGER                "/etc/proptrigger.sh"
+#define PROP_TRIGGER_CONF           "/etc/proptrigger.conf"
 
 #undef  LOG_TAG
-#define LOG_TAG "le_property"
-
-#define PRI_INFO " I"
-#define PRI_WARN " W"
-#define PRI_ERROR " E"
-#define PRI_DEBUG " D"
-#define PRI_VERB " V"
+#define LOG_TAG "leprop-service"
 
 #undef LOG_DEBUG
 //#define LOG_DEBUG
@@ -56,24 +52,14 @@
 #undef LOG
 #ifdef LOG_DEBUG
   #define LOG(fmt, args...) \
-	    ALOGD("%s:%d " fmt "\n", __func__, __LINE__, ##args)
+        ALOGD("%s:%d " fmt "\n", __func__, __LINE__, ##args)
 #else
   #define LOG(fmt, args...) do {} while(0)
 #endif
 
 #define UNUSED(x) (void)(x)
 
-typedef enum {
-        LOAD_FROM_PERSIST_FILE = 1,
-        CHECK_IF_PROP_EXIST,
-        GET_PROP_VALUE,
-        SET_PROP_VALUE,
-        SAVE_DS_TO_PERSIST_FILE,
-        DUMP_CURRENT_DS,
-        DELETE_PROPERTY,
-        DEINIT_PROPERTY_SERVICE
-} user_choice;
-
+#define MAX_CONN (32) // mximum number of connected clients
 
 typedef struct property_unit{
     unsigned char property_name[PROP_NAME_MAX];     // name of property
@@ -176,7 +162,7 @@ property_db* pull_one_line_data(const char*);
  * @param Char * for property name
  * @return 0 on success and 1 otherwise
  */
-int process_setprop_msg(char*);
+property_db* process_setprop_msg(char*);
 
 /**
  * Get the property value for datastructure for
