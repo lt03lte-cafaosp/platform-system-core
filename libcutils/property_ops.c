@@ -37,134 +37,128 @@
 #include <grp.h>
 #include <sys/un.h>
 #include <cutils/sockets.h>
-#include <fcntl.h>
-
 #include "property_ops.h"
-
-static int sock_fd = -1;
-static pthread_mutex_t leprop_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int open_prop_socket()
 {
     int fd, ret = 0;
 
-    if (sock_fd < 0) {
-        fd = TEMP_FAILURE_RETRY(socket(PF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0));
-        if (fd < 0) {
-            ret = -errno;
-        } else if (TEMP_FAILURE_RETRY(fcntl(fd, F_SETFL, O_NONBLOCK)) < 0) {
-            ret = -errno;
-            close(fd);
-        } else {
-            struct sockaddr_un un;
-            memset(&un, 0, sizeof(struct sockaddr_un));
-            un.sun_family = AF_UNIX;
-            snprintf(un.sun_path, sizeof(un.sun_path),
+    fd = socket(PF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+    if (fd < 0) {
+        ret = -errno;
+    } else {
+        struct sockaddr_un un;
+        memset(&un, 0, sizeof(struct sockaddr_un));
+        un.sun_family = AF_UNIX;
+        snprintf(un.sun_path, sizeof(un.sun_path),
                         ANDROID_SOCKET_DIR"/%s", PROP_SERVICE_NAME);
 
-            if (TEMP_FAILURE_RETRY(connect(fd, (struct sockaddr *)&un,
+    if (TEMP_FAILURE_RETRY(connect(fd, (struct sockaddr *)&un,
                                        sizeof(struct sockaddr_un))) < 0) {
-                ALOGE("Failed to connect to %s socket (%s)", PROP_SERVICE_NAME,
-                strerror(errno));
-                close(fd);
-                ret = -errno;
-            } else {
-                sock_fd = fd;
-            }
+            ALOGE("Failed to connect to %s socket", PROP_SERVICE_NAME);
+            close(fd);
+            ret = -errno;
+        } else {
+        ret = fd;  // return socket fd.
         }
     }
     return ret;
 }
 
-static int send_prop_msg(const char *msg, char *resp)
+static int send_setprop_msg(const char *msg)
 {
-    int ret = -1;
+    int fd, ret = 0;
 
-    if (sock_fd < 0) {
-        ret = open_prop_socket();
-        if (ret < 0) {
-            ALOGE("Failed to open Socket");
-            return ret; // pass error back to caller.
-        }
+    fd = open_prop_socket();
+    if (fd < 0) {
+       ALOGE("Failed to open Socket");
+       return fd; // pass error back to caller.
     }
 
-    if (sock_fd > 0) {
-        int msg_len = strlen(msg);
-        int status = -1;
-        // ensure only one thread at a time
-        // send message to property service
-        pthread_mutex_lock(&leprop_mutex);
-        do {
-            status = send(sock_fd, msg, msg_len, 0);
-            if ( status == -1 ) {
-                if ((errno != EAGAIN) && (errno != EWOULDBLOCK)) {
-                    LOG("Send error: %s", strerror(errno));
-                    ret = -errno;
-                    pthread_mutex_unlock(&leprop_mutex);
-                    break;
-                }
-                continue;
-            } else if (status == 0) {
-                LOG("Sent zero size data: May be property service down");
-                ret = -1;
-                pthread_mutex_unlock(&leprop_mutex);
-                break;
-            }
-            LOG( "Sent %d bytes on sock_fd: %d", status, sock_fd);
-        } while (status <= 0);
+    int msg_len = strlen(msg);
+    const int num_bytes = TEMP_FAILURE_RETRY(send(fd, msg, msg_len, 0));
 
-        // Successfully wrote to the property service
-        // now handle data sent from service
-        char recv_buf[MAX_ALLOWED_LINE_LEN+1];
-        memset(recv_buf, 0 , sizeof(recv_buf));
+    if (num_bytes == msg_len) {
+        // Successfully wrote to the property service but now wait
+        // for 250 ms for property service to finish its work. It
+        // acknowledges its completion by closing the socket.
+        struct pollfd pollfds[1];
+        pollfds[0].fd = fd;
+        pollfds[0].events = 0;
+        const int poll_result = TEMP_FAILURE_RETRY(poll(pollfds, 1, 250 /* ms */));
+        if (poll_result == 1 && (pollfds[0].revents & POLLHUP) != 0) {
+            ret = 0;
+        } else {
+            ALOGE("setprop poll timed out");
+            ret = 0; // Ignore timeout and treat it like a success.
+        }
+        LOG("Sent %d bytes of data (%s) to Socket", num_bytes, msg);
+    }
+    close(fd);
+    return ret;
+}
 
-        do {
-            status = recv(sock_fd, recv_buf, sizeof(recv_buf), 0);
-            if (status == -1) {
-                if ((errno != EAGAIN) && (errno != EWOULDBLOCK)) {
-                    LOG("Receive error: %s", strerror(errno));
-                    ret = -errno;
-                    break;
-                }
-                continue;
-            } else if (status == 0) {
-                LOG("Received zero size data: May be property service down");
+static int send_getprop_msg(const char *msg, char *resp)
+{
+    int fd = open_prop_socket();
+    if (fd < 0) {
+       ALOGE("Failed to open Socket");
+       return fd; // pass error back to caller.
+    }
+
+    int ret = 0;
+    int msg_len = strlen(msg);
+    const int num_bytes = TEMP_FAILURE_RETRY(send(fd, msg, msg_len, 0));
+
+    if (num_bytes == msg_len) {
+        // Successfully wrote to the property service but now wait
+        // for 250 ms for property service to finish its work. It
+        // acknowledges its completion by closing the socket.
+        struct pollfd pollfds[1];
+        pollfds[0].fd = fd;
+        pollfds[0].events = 0;
+        const int poll_result = TEMP_FAILURE_RETRY(poll(pollfds, 1, 250 /* ms */));
+        if (poll_result == 1 && (pollfds[0].revents & POLLHUP) != 0) {
+            //Handle data sent from service
+            char recv_buf[MAX_ALLOWED_LINE_LEN+1];
+            memset(recv_buf, 0 , sizeof(recv_buf));
+            int nbytes = recv(fd, recv_buf, sizeof(recv_buf), 0);
+            if (nbytes <= 0) {
+                ALOGE("recv failed (%s)",strerror(errno));
                 ret = -1;
-                break;
             } else {
-                recv_buf[status] = '\0';
-                LOG("Received %d bytes of data (%s) from Socket",status, recv_buf);
+                recv_buf[nbytes] = '\0';
+                LOG("Received %d bytes of data (%s) from Socket",nbytes, recv_buf);
                 int i = 1;
                 while(i < strlen(recv_buf)){
                     resp[i-1] = recv_buf[i];
                     i++;
                 }
                 ret = 0;
-                break;
             }
-        } while (status <= 0);
-        pthread_mutex_unlock(&leprop_mutex);
+        } else {
+            ALOGE("getprop poll timed out");
+            ret = -1; // Don't try to recv in case of time out.
+        }
     }
+    close(fd);
     return ret;
 }
 
 bool set_property_value(const char* prop_name, unsigned char *prop_val)
 {
     const char msg[MAX_ALLOWED_LINE_LEN+1]; // +1 for msg type.
-    char resp[MAX_ALLOWED_LINE_LEN];
-    memset(msg, 0 , sizeof(msg));
-    memset(resp, 0 , sizeof(resp));
+    memset(msg, 0 , sizeof msg);
 
-    LOG("Received request to setprop: %s", prop_name);
     snprintf(msg, MAX_ALLOWED_LINE_LEN+1, "%c%s=%s",
              PROP_MSG_SETPROP, prop_name, prop_val);
 
-    const int err = send_prop_msg(&msg, &resp);
+    const int err = send_setprop_msg(&msg);
     if (err < 0) {
-       LOG("Failed to send message to Set %s", prop_name);
+       ALOGE("Failed to send message to Set %s", prop_name);
        return false;
     }
-    LOG("Completed request to setprop: %s", prop_name);
+
     return true;
 }
 
@@ -172,13 +166,14 @@ bool get_property_value(const char* prop_name, unsigned char *prop_val)
 {
     const char msg[MAX_ALLOWED_LINE_LEN+1]; // +1 for msg type.
     char resp[MAX_ALLOWED_LINE_LEN];
+
     memset(msg,  0 , sizeof(msg));
     memset(resp, 0 , sizeof(resp));
 
-    LOG("Received request to getprop: %s", prop_name);
-    snprintf(msg, sizeof(msg), "%c%s=", PROP_MSG_GETPROP, prop_name);
+    snprintf(msg, sizeof msg, "%c%s=",
+            PROP_MSG_GETPROP, prop_name);
 
-    const int err = send_prop_msg(&msg, &resp);
+    const int err = send_getprop_msg(&msg, &resp);
     if (err < 0) {
        LOG("Failed to send message to Get %s", prop_name);
        return false;
@@ -193,7 +188,7 @@ bool get_property_value(const char* prop_name, unsigned char *prop_val)
     }
 
     strlcpy(prop_val, curr_line_ptr, PROP_VALUE_MAX);
-    LOG("Completed request to getprop: %s", prop_name);
+
     return true;
 }
 
