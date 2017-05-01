@@ -163,6 +163,28 @@ run_sdx20() {
 	fi
 }
 
+run_8096() {
+	if [ $from_adb = "n" ]
+	then
+		pkill adb
+		/etc/launch_adbd start
+		sleep 1
+	fi
+	cd /sys/kernel/config/usb_gadget/g1
+	rm configs/b.1/f*
+	echo 0x05c6 > idVendor
+	echo 0x9025 > idProduct
+	echo "DIAG_ADB_DUN_RMNET_MSC" > configs/b.1/strings/0x409/configuration
+	ln -s functions/diag.diag configs/b.1/f1
+	ln -s functions/ffs.adb configs/b.1/f2
+	ln -s functions/cser.dun.0 configs/b.1/f3
+	ln -s functions/rmnet_bam.rmnet configs/b.1/f4
+	ln -s functions/mass_storage.0 configs/b.1/f5
+	udcname=`ls /sys/class/udc`
+	echo "binding UDC with Gadget..." $udcname
+	echo $udcname > UDC
+}
+
 case `source /sbin/usb/target` in
 	*9x15* )
 		run_9x15 &
@@ -190,7 +212,11 @@ case `source /sbin/usb/target` in
 		echo "This composition can't be supported on 8909"
 		;;
         *8096* )
-                run_9x35 &
+		if [ -f /sys/class/android_usb/android$num/enable ]; then
+			run_9x35 &
+		else
+			run_8096 &
+		fi
                 ;;
 	*9640* )
 		run_9x35 &
