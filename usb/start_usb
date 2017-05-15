@@ -129,6 +129,10 @@ case "$1" in
 		*9650* )
 			echo 16384 > /sys/module/g_android/parameters/gsi_in_rndis_aggr_size
 			;;
+		*sdx20* )
+			echo Y > /sys/module/libcomposite/parameters/enable_l1_for_hs
+			echo Y > /sys/module/dwc3/parameters/enable_dwc3_u1u2
+			;;
 		*8053* | *8017* )
 			wait_for_data_mount
 			ln -fs /sbin/usb/compositions/901D /data/usb/boot_hsusb_composition
