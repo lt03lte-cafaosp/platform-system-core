@@ -26,7 +26,7 @@
 
 # DESCRIPTION: DIAG + QDSS + ADB
 
-echo "Switching to composition number 0x9060"
+echo "Switching to composition number 0x9060" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"

@@ -26,7 +26,7 @@
 
 # DESCRIPTION:  DIAG + ADB + MBIM + GNSS + DUN
 
-echo "Switching to composition number 0x90D5"
+echo "Switching to composition number 0x90D5" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"
