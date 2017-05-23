@@ -26,7 +26,7 @@
 
 # DESCRIPTION: DIAG + ADB + UAC2
 
-echo "Switching to composition number 0x90CA"
+echo "Switching to composition number 0x90CA" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"

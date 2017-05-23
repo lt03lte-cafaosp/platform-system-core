@@ -26,7 +26,7 @@
 
 # DESCRIPTION: RNDIS + ADB [Android]
 
-echo "Switching to composition number 0x9024"
+echo "Switching to composition number 0x9024" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"
