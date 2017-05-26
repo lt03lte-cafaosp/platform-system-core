@@ -44,8 +44,11 @@ static int persist_storage_ready = 0;
 int main(int argc, char* argv[]) {
 
     int listen_fd = 0;
-    int conn_sock[MAX_CONN];
-    memset(conn_sock, 0, sizeof(conn_sock));
+    int conn_fd = 0;
+    fd_set read_fds;
+    int fdmax = -1;
+    socklen_t msglen;
+    char recv_buf[MAX_ALLOWED_LINE_LEN+1];
 
     if(false == load_default_properties()) {
         LOG("Failed to load default properties");
@@ -64,37 +67,21 @@ int main(int argc, char* argv[]) {
         exit (1);
     }
 
-    LOG("properties service is ready!!!");
+    FD_ZERO(&read_fds);
+    FD_SET(listen_fd, &read_fds);
+    fdmax = listen_fd;  //so far, only this one
 
     while (1) {
-        fd_set read_fds;
-        int fdmax = 0;
-        int conn_fd = 0;
-        int i = 0;
-        int recv_size = 0;
-        char recv_buf[MAX_ALLOWED_LINE_LEN+1];
         memset(recv_buf, 0, sizeof(recv_buf));
 
-        FD_ZERO(&read_fds);
-        FD_SET(listen_fd, &read_fds); // add listen fd to read list
-        fdmax = listen_fd;
-
-        //add existing connection sockets to set
-        for (i = 0; i < MAX_CONN; i++) {
-            conn_fd = conn_sock[i];
-            if(conn_fd > 0) FD_SET(conn_fd , &read_fds);
-            if(conn_fd > fdmax) fdmax = conn_fd;
-        }
-
-        LOG("Waiting for select!!!");
         if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) < 0) {
             if (errno == EINTR)
                 continue;
             LOG("select failed (%s) fdmax=%d", strerror(errno), fdmax);
+            sleep(1);
             continue;
         }
 
-        // new connection
         if(FD_ISSET(listen_fd, &read_fds)) {
             struct sockaddr* addrp;
             int alen;
@@ -103,120 +90,53 @@ int main(int argc, char* argv[]) {
                 conn_fd = accept(listen_fd, (struct sockaddr *)&addrp, &alen);
                 LOG("Got conn_fd=%d from accept", conn_fd);
             } while (conn_fd < 0 && errno == EINTR);
-
             if (conn_fd < 0) {
                 LOG("accept failed (%s)", strerror(errno));
+                sleep(1);
                 continue;
             }
-            fcntl(conn_fd, F_SETFD, FD_CLOEXEC | SOCK_NONBLOCK);
+            fcntl(conn_fd, F_SETFD, FD_CLOEXEC);
 
-            //add new socket to read list
-            for (i = 0; i < MAX_CONN; i++)
-            {
-               if( conn_sock[i] == 0 ) {
-                conn_sock[i] = conn_fd;
-                LOG("Adding to read list at %d" , i);
-                break;
-               }
+            //handle data from a client
+            int nbytes = 0;
+            nbytes = recv(conn_fd, recv_buf, sizeof(recv_buf), 0);
+            if (nbytes <= 0) {
+                LOG("recv failed (%s)",strerror(errno));
+                continue;
             }
 
-            //handle data
-            while (1) {
-                int fd = 0;
-                recv_size = TEMP_FAILURE_RETRY(recv(conn_fd, recv_buf, sizeof(recv_buf), 0));
-                if( recv_size == -1) {
-                    if ((errno != EAGAIN) && (errno != EWOULDBLOCK)) {
-                        LOG("Receive error (%s) on new conn: %d", strerror(errno), conn_fd);
-                        break;
-                    }
-                    continue;
-                } else if (recv_size == 0) {
-                    LOG("Received zero size data closing new conn:%d", conn_fd);
-                    break;
-                }
-                LOG("Received %d bytes (%s) on new conn:%d", recv_size, recv_buf, conn_fd);
-                break;
-            }
-        } else {
-            //data on existing connection
-            for (i = 0; i < MAX_CONN; i++)
-            {
-                int fd = conn_sock[i];
-                if (FD_ISSET(fd , &read_fds)) {
-                    //handle data
-                    while (1) {
-                        recv_size = TEMP_FAILURE_RETRY(recv(fd, recv_buf, sizeof(recv_buf), 0));
-                        if (recv_size == -1) {
-                            if ((errno != EAGAIN) && (errno != EWOULDBLOCK)) {
-                                LOG("Receive error (%s) on existing conn: %d", strerror(errno), fd);
-                                break;
-                            }
-                            continue;
-                        } else if (recv_size == 0) {
-                            LOG("Received zero size data closing conn:%d", fd);
-                            close(fd); //Close the socket and remove from read list
-                            conn_sock[i] = 0;
-                            break;
-                        }
-                        LOG("Received %d bytes (%s) on existing conn:%d" ,recv_size, recv_buf, fd);
-                        conn_fd = fd;
-                        break;
-                    }
-                    if (conn_fd == fd)
-                        break; // got a valid connection skip remaining.
-                }
-            }
-        }
-
-        // process data
-        if (recv_size > 0) {
-            LOG("Successfully received %d bytes (%s)", recv_size, recv_buf);
-            recv_buf[recv_size] = '\0';
-            property_db *node = NULL;
-            const char msg[MAX_ALLOWED_LINE_LEN+1]; // +1 for cmd.
-            memset(msg, 0 , sizeof(msg));
-
+            // process data
+            LOG("Successfully received %d bytes of data: %s",nbytes, recv_buf);
+            recv_buf[nbytes] = '\0';
             if (recv_buf[0] == PROP_MSG_SETPROP) {
-                node = process_setprop_msg(recv_buf);
-
-                snprintf(msg, MAX_ALLOWED_LINE_LEN+1, "%c%s=%s",
-                        PROP_MSG_SETPROP, node->unit.property_name,
-                        node->unit.property_value);
+                process_setprop_msg(recv_buf);
+                close(conn_fd); // indicate completion to client
             } else if(recv_buf[0] == PROP_MSG_GETPROP) {
                 // read data from ds and pass to client
-                node = process_getprop_msg(recv_buf);
+                property_db *node = process_getprop_msg(recv_buf);
+                const char msg[MAX_ALLOWED_LINE_LEN+1]; // +1 for cmd.
+                memset(msg, 0 , sizeof(msg));
 
                 snprintf(msg, MAX_ALLOWED_LINE_LEN+1, "%c%s=%s",
                         PROP_MSG_GETPROP, node->unit.property_name,
                         node->unit.property_value);
+
+                int msg_len = strlen(msg);
+                const int num_bytes = TEMP_FAILURE_RETRY(send(conn_fd, msg, msg_len, 0));
+                if (node) free(node);
+                close(conn_fd); // indicate completion to client
+                LOG("Sending %d bytes of data (%s) to client", num_bytes, msg);
             } else {
                 LOG("Invalid msg received");
             }
-
-            int msg_len = strlen(msg);
-            while (1) {
-                int status = TEMP_FAILURE_RETRY(send(conn_fd, msg, msg_len, 0));
-                if ( status == -1 ) {
-                    if ((errno != EAGAIN) && (errno != EWOULDBLOCK)) {
-                        LOG("Send error on conn_fd:%d (%s)", conn_fd, strerror(errno));
-                        break;
-                    }
-                    continue;
-                } else if (status == 0) {
-                    LOG("Sent zero size data may be client is down");
-                    break;
-                }
-                LOG("Sent %d bytes (%s) to client", status, msg);
-                break;
-            }
-            if (node) free(node);
         }
     }
-    close(listen_fd);
+
+    TEMP_FAILURE_RETRY(pause());
     exit(0);
 }
 
-property_db* process_setprop_msg(char* buff)
+int process_setprop_msg(char* buff)
 {
     property_db *node = NULL;
     char line[MAX_ALLOWED_LINE_LEN];
@@ -246,8 +166,9 @@ property_db* process_setprop_msg(char* buff)
             save_persist_ds_to_file();
             LOG("Completed storing data to persist file");
         }
+        free(node);
     }
-    return node;
+    return 0;
 }
 
 property_db* process_getprop_msg(char* buff)

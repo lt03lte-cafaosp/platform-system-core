@@ -50,7 +50,13 @@
 #define PROP_SERVICE_NAME "leprop-service"
 
 #undef  LOG_TAG
-#define LOG_TAG "leprop"
+#define LOG_TAG "le_property"
+
+#define PRI_INFO " I"
+#define PRI_WARN " W"
+#define PRI_ERROR " E"
+#define PRI_DEBUG " D"
+#define PRI_VERB " V"
 
 #undef LOG_DEBUG
 //#define LOG_DEBUG
@@ -58,7 +64,7 @@
 #undef LOG
 #ifdef LOG_DEBUG
   #define LOG(fmt, args...) \
-      ALOGD("%s:%d " fmt "\n", __func__, __LINE__, ##args)
+	    ALOGD("%s:%d " fmt "\n", __func__, __LINE__, ##args)
 #else
   #define LOG(fmt, args...) do {} while(0)
 #endif
