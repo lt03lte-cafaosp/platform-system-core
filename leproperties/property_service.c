@@ -216,60 +216,6 @@ int main(int argc, char* argv[]) {
     exit(0);
 }
 
-bool valid_trigger(const char* name)
-{
-    FILE *fp = fopen(PROP_TRIGGER_CONF, "r");
-
-    if (NULL != fp)
-    {
-        int line_num = 0;
-        char line[MAX_ALLOWED_LINE_LEN];
-        memset(line, 0, sizeof(line));
-
-        while(fgets(line, sizeof(line), fp))
-        {
-            // fgets adds '\n'. Replace it with '\0'
-            char *p;
-            if ((p=strchr(line, '\n')) != NULL)  *p = '\0';
-
-            LOG("%s, line: %s num: %d ", __func__, line, line_num);
-            if (strcmp(name, line) == 0) {
-               LOG("%s, Found trigger: %s", __func__, line);
-               fclose(fp);
-               return true;
-            }
-            line_num++;
-        }
-        LOG("%s, reached EOF", __func__);
-        fclose(fp);
-    }
-    return false;
-}
-
-void prop_trigger(char* name, char* val)
-{
-    char *argv[] = { NULL, NULL, NULL, NULL };
-
-    argv[0] = PROP_TRIGGER;
-    argv[1] = name;
-    argv[2] = val;
-    argv[3] = NULL;
-
-    switch (fork()) {
-        case 0:
-            execv(argv[0], argv);
-            ALOGE("execv(\"%s\") failed: %s", argv[0], strerror(errno));
-            break;
-        case -1:
-            ALOGE("Cannot fork: %s", strerror(errno));
-            return -1;
-            break;
-        default:
-            break;
-   }
-   return 0;
-}
-
 property_db* process_setprop_msg(char* buff)
 {
     property_db *node = NULL;
@@ -300,11 +246,6 @@ property_db* process_setprop_msg(char* buff)
             save_persist_ds_to_file();
             LOG("Completed storing data to persist file");
         }
-
-        //start property trigger
-        if (true == valid_trigger(node->unit.property_name))
-            prop_trigger(node->unit.property_name, node->unit.property_value);
-
     }
     return node;
 }

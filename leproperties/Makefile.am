@@ -8,7 +8,3 @@ leprop_service_CPPFLAGS = -I$(top_srcdir)/include
 leprop_service_CPPFLAGS += -I$(top_srcdir)/libcutils
 
 leprop_service_LDFLAGS  = -llog -lcutils
-
-root_etcdir      := "/etc/"
-root_etc_SCRIPTS := proptrigger.sh
-root_etc_SCRIPTS += proptrigger.conf
