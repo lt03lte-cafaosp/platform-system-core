@@ -26,7 +26,7 @@
 
 # DESCRIPTION: MTP + ADB(Android)
 
-echo "Switching to composition number 0x9039"
+echo "Switching to composition number 0x9039" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"

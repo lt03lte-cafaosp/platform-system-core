@@ -78,8 +78,13 @@ case "$1" in
 		mkdir strings/0x409
 		mkdir configs/b.1
 		mkdir configs/b.1/strings/0x409
+		mkdir functions/mass_storage.0
 		mkdir functions/ffs.adb
 		mkdir functions/diag.diag
+		mkdir functions/cser.dun.0
+		mkdir functions/cser.nmea.1
+		mkdir functions/rmnet_bam.rmnet
+		mkdir functions/ncm.0
 		echo "$serialno" > strings/0x409/serialnumber
 		echo "QCOM" > strings/0x409/manufacturer
 		echo "$socplatform" > strings/0x409/product
@@ -123,6 +128,10 @@ case "$1" in
 			;;
 		*9650* )
 			echo 16384 > /sys/module/g_android/parameters/gsi_in_rndis_aggr_size
+			;;
+		*sdx20* )
+			echo Y > /sys/module/libcomposite/parameters/enable_l1_for_hs
+			echo Y > /sys/module/dwc3/parameters/enable_dwc3_u1u2
 			;;
 		*8053* | *8017* )
 			wait_for_data_mount

@@ -26,7 +26,7 @@
 
 # DESCRIPTION: DIAG + ADB
 
-echo "Switching to composition number 0x901D"
+echo "Switching to composition number 0x901D"  > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"
@@ -66,9 +66,14 @@ run_9x35() {
 }
 
 run_8098() {
-	/etc/launch_adbd start
-	sleep 1
+	if [ $from_adb = "n" ]
+	then
+		pkill adb
+		/etc/launch_adbd start
+		sleep 1
+	fi
 	cd /sys/kernel/config/usb_gadget/g1
+	rm configs/b.1/f*
 	echo 0x05c6 > idVendor
 	echo 0x901d > idProduct
 	echo "DIAG_ADB" > configs/b.1/strings/0x409/configuration

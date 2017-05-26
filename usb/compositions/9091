@@ -26,7 +26,7 @@
 
 # DESCRIPTION: DIAG + MODEM + QMI_RMNET + ADB
 
-echo "Switching to composition number 0x9091"
+echo "Switching to composition number 0x9091" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"

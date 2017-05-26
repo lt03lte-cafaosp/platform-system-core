@@ -26,7 +26,7 @@
 
 # DESCRIPTION: RNDIS + ADB + Mass Storage
 
-echo "Switching to composition number 0x902B"
+echo "Switching to composition number 0x902B" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"
