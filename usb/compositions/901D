@@ -26,7 +26,7 @@
 
 # DESCRIPTION: DIAG + ADB
 
-echo "Switching to composition number 0x901D"
+echo "Switching to composition number 0x901D"  > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"

@@ -122,6 +122,22 @@ case "$1" in
          esac
 
          case "$soc_id" in
+         "333" | "314")
+                echo -n "Starting powerconfig for SDX20: "
+                echo N > /sys/module/lpm_levels/parameters/sleep_disabled
+                # Disable LPMs
+                echo N > /sys/module/lpm_levels/system/cpu0/wfi/idle_enabled
+                echo N > /sys/module/lpm_levels/system/cpu0/standalone_pc/idle_enabled
+                echo N > /sys/module/lpm_levels/system/cpu0/pc/idle_enabled
+                echo N > /sys/module/lpm_levels/system/cpu0/wfi/suspend_enabled
+                echo N > /sys/module/lpm_levels/system/cpu0/standalone_pc/suspend_enabled
+                echo Y > /sys/module/lpm_levels/system/cpu0/pc/suspend_enabled
+                echo performance >  /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+                echo mem > /sys/power/autosleep
+                ;;
+         esac
+
+         case "$soc_id" in
          "187" | "227" | "228" | "229" | "230" | "231")
                 echo -n "Starting powerconfig for 9x35: "
                 subsyszero=`cat /sys/bus/msm_subsys/devices/subsys0/name`

@@ -26,7 +26,7 @@
 
 # DESCRIPTION:  RNDIS : ECM
 
-echo "Switching to composition number 0x9057"
+echo "Switching to composition number 0x9057" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"

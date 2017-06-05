@@ -26,7 +26,7 @@
 
 # DESCRIPTION: DIAG + ADB + DUN + RMNET + Mass Storage + QDSS [Android]
 
-echo "Switching to composition number 0x9049"
+echo "Switching to composition number 0x9049" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"

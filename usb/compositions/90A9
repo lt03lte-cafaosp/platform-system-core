@@ -26,7 +26,7 @@
 
 # DESCRIPTION: DIAG + ADB + MODEM + NMEA + QDSS (bulk in) + RMNET : ECM : MBIM
 
-echo "Switching to composition number 0x90A9"
+echo "Switching to composition number 0x90A9" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"

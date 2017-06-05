@@ -26,7 +26,7 @@
 
 # DESCRIPTION: DIAG + ADB + GNSS
 
-echo "Switching to composition number 0x90CD"
+echo "Switching to composition number 0x90CD" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"

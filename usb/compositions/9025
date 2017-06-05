@@ -26,7 +26,7 @@
 
 # DESCRIPTION: DIAG + ADB + MODEM + NMEA + QMI_RMNET + Mass Storage (Android)
 
-echo "Switching to composition number 0x9025"
+echo "Switching to composition number 0x9025" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"

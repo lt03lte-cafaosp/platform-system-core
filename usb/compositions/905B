@@ -26,7 +26,7 @@
 
 # DESCRIPTION: MBIM
 
-echo "Switching to composition number 0x905b"
+echo "Switching to composition number 0x905b" > /dev/kmsg
 
 if [ "$1" = "y" ]; then
 	num="1"
