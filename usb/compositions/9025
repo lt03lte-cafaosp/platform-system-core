@@ -180,9 +180,8 @@ run_8096() {
 	ln -s functions/cser.dun.0 configs/b.1/f3
 	ln -s functions/rmnet_bam.rmnet configs/b.1/f4
 	ln -s functions/mass_storage.0 configs/b.1/f5
-	udcname=`ls /sys/class/udc`
-	echo "binding UDC with Gadget..." $udcname
-	echo $udcname > UDC
+	echo "binding UDC with Gadget..." $1
+	echo $1 > UDC
 }
 
 case `source /sbin/usb/target` in
@@ -212,10 +211,11 @@ case `source /sbin/usb/target` in
 		echo "This composition can't be supported on 8909"
 		;;
         *8096* )
+		udcname="6a00000.dwc3"
 		if [ -f /sys/class/android_usb/android$num/enable ]; then
 			run_9x35 &
 		else
-			run_8096 &
+			run_8096 $udcname &
 		fi
                 ;;
 	*9640* )
