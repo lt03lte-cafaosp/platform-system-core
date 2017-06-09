@@ -79,9 +79,8 @@ run_8098() {
 	echo "DIAG_ADB" > configs/b.1/strings/0x409/configuration
 	ln -s functions/diag.diag configs/b.1/f1
 	ln -s functions/ffs.adb configs/b.1/f2
-	udcname=`ls /sys/class/udc`
-	echo "binding UDC with Gadget..." $udcname
-	echo $udcname > UDC
+	echo "binding UDC with Gadget..." $1
+	echo $1 > UDC
 }
 
 case `source /sbin/usb/target` in
@@ -92,14 +91,16 @@ case `source /sbin/usb/target` in
 		run_9x35 &
 		;;
         *8096* )
+		udcname="6a00000.dwc3"
 		if [ -f /sys/class/android_usb/android$num/enable ]; then
 			run_9x35 &
 		else
-			run_8098 &
+			run_8098 $udcname &
 		fi
                 ;;
 	*8098* )
-		run_8098 &
+		udcname=`ls /sys/class/udc`
+		run_8098 $udcname &
 		;;
         * )
 		run_9x35 &
